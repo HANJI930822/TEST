@@ -1458,6 +1458,123 @@
           padding: 20px; /* 手機版內距稍小 */
         }
       }
+      /* ===== ✅ 【新增】技能標籤化樣式 (簡潔版) ===== */
+.skill-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  font-size: 0.75em;
+  color: #ddd;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.skill-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.skill-val {
+  color: var(--gold);
+  font-weight: bold;
+  margin-left: 3px;
+}
+/* ===== 🖥️ 儀表板左右佈局優化 ===== */
+
+/* 1. 外層容器：Flex 橫向排列 */
+.dashboard-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* 2. 左側：玩家資訊 */
+.player-info-section {
+  flex: 1; /* 佔用左側空間 */
+  min-width: 200px;
+}
+
+.player-base {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. 右側：技能區塊 */
+.skills-section {
+  flex: 1.2; /* 右側稍微寬一點 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 靠右對齊 */
+}
+
+/* 技能網格佈局 */
+.skills-grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end; /* 靠右排列 */
+}
+
+/* 4. 技能標籤樣式微調 */
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  font-size: 0.8em;
+  color: #ccc;
+  transition: all 0.2s;
+}
+
+.skill-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.skill-val {
+  color: var(--gold);
+  font-weight: bold;
+  margin-left: 6px;
+  font-size: 1.1em;
+}
+
+/* ===== 📱 手機版響應式 (螢幕變窄時自動變回上下排列) ===== */
+@media (max-width: 767px) {
+  .dashboard-wrapper {
+    flex-direction: column; /* 改為垂直排列 */
+    gap: 15px;
+  }
+  
+  .skills-section {
+    width: 100%;
+    align-items: flex-start; /* 手機版靠左對齊 */
+  }
+  
+  .section-label {
+    text-align: left !important;
+  }
+  
+  .skills-grid-layout {
+    justify-content: flex-start; /* 手機版靠左排列 */
+  }
+}
     </style>
   </head>
   <body>
@@ -1497,52 +1614,45 @@
     <!-- 遊戲主畫面 -->
     <div id="scene-game">
       <div class="header">
-        <div class="player-info">
-          <div class="player-avatar" id="player-avatar">👶</div>
-          <div class="player-details">
-            <div class="player-name-line">
-              <span id="player-name">???</span>
-              <span style="font-size: 0.8em; color: var(--text-dim)">
-                <span id="age-display">0</span>歲</span
-              >
+        <div class="dashboard-wrapper">
+          
+          <div class="player-info-section">
+            <div class="player-base">
+              <div class="player-avatar" id="player-avatar">👶</div>
+              <div class="player-text">
+                <div class="player-name-line">
+                  <span id="player-name">???</span>
+                  <span style="font-size: 0.8em; color: var(--text-dim)">
+                    <span id="age-display">0</span>歲</span>
+                </div>
+                <div class="player-subtitle">
+                  <span id="player-origin"></span> | <span id="player-job"></span>
+                </div>
+              </div>
             </div>
-            <div class="player-subtitle">
-              <span id="player-origin"></span> | <span id="player-job"></span>
-            </div>
-            <!-- 天賦顯示 -->
-            <div id="talent-display" style="margin-top: 5px"></div>
-            <!-- ✅ 特質顯示 -->
+
+            <div id="talent-display" style="margin-top: 8px"></div>
             <div id="trait-display" style="margin-top: 5px"></div>
           </div>
+
+          <div class="skills-section">
+             <div class="section-label" style="font-size: 0.8em; color: var(--accent); margin-bottom: 5px; text-align: right;">📊 技能狀態</div>
+             <div id="skills-container" class="skills-grid-layout"></div>
+          </div>
+
         </div>
 
         <div class="big-stat" id="money-display">$0</div>
-
+        
         <div class="stat-grid">
-          <div class="stat-item">
-            <span>❤️ 健康</span>
-            <span class="stat-value" id="health">100</span>
-          </div>
-          <div class="stat-item">
-            <span>😊 快樂</span>
-            <span class="stat-value" id="happy">80</span>
-          </div>
-          <div class="stat-item">
-            <span>🧠 智力</span>
-            <span class="stat-value" id="intel">50</span>
-          </div>
+           <div class="stat-item"><span>❤️ 健康</span><span class="stat-value" id="health">100</span></div>
+           <div class="stat-item"><span>😊 快樂</span><span class="stat-value" id="happy">80</span></div>
+           <div class="stat-item"><span>🧠 智力</span><span class="stat-value" id="intel">50</span></div>
         </div>
 
-        <div class="skills-container" id="skills-container"></div>
-
         <div class="stamina-container">
-          <div class="stamina-label">
-            <span>⚡ 體力</span>
-            <span id="stamina-text">100/100</span>
-          </div>
-          <div class="progress-bg">
-            <div id="stamina-bar" class="progress-fill"></div>
-          </div>
+           <div class="stamina-label"><span>⚡ 體力</span><span id="stamina-text">100/100</span></div>
+           <div class="progress-bg"><div id="stamina-bar" class="progress-fill"></div></div>
         </div>
 
         <div class="status-alerts" id="status-alerts"></div>
@@ -1850,7 +1960,7 @@
         },
       ];
       // ==========================================
-      // 🆕 新增：存檔系統
+      // 🆕 新增：存檔系統 (已修正變數名稱)
       // ==========================================
       const SAVE_KEY = "lifeSimV17_save";
 
@@ -1858,25 +1968,25 @@
         const saveData = {
           version: "17.0",
           timestamp: Date.now(),
-          player: game.name,
-          age: game.age,
-          money: game.money,
-          health: game.health,
-          happy: game.happy,
-          intel: game.intel,
-          stamina: game.stamina,
-          skills: { ...game.skills },
-          job: game.job,
-          origin: game.origin,
-          traits: [...game.traits],
-          talents: [...game.talents],
-          items: [...game.items],
-          npcs: game.npcs.map((n) => ({ ...n })),
-          achievements: [...game.achievements],
-          stats: { ...game.stats },
-          lifeStage: game.lifeStage,
-          partner: game.partner,
-          gender: game.gender,
+          player: Game.name, // 修正：game -> Game
+          age: Game.age,
+          money: Game.money,
+          health: Game.health,
+          happy: Game.happy,
+          intel: Game.intel,
+          stamina: Game.stamina,
+          skills: { ...Game.skills },
+          job: Game.job,
+          origin: Game.origin,
+          traits: [...Game.traits],
+          talents: [...Game.talents],
+          items: [...Game.items],
+          npcs: Game.npcs.map((n) => ({ ...n })),
+          achievements: [...Game.achievements],
+          stats: { ...Game.stats },
+          lifeStage: Game.lifeStage,
+          partner: Game.partner,
+          gender: Game.gender,
         };
 
         try {
@@ -1899,32 +2009,33 @@
 
           const data = JSON.parse(saved);
 
-          game.name = data.player;
-          game.age = data.age;
-          game.money = data.money;
-          game.health = data.health;
-          game.happy = data.happy;
-          game.intel = data.intel;
-          game.stamina = data.stamina;
-          game.skills = data.skills;
-          game.job = data.job;
-          game.origin = data.origin;
-          game.traits = data.traits;
-          game.talents = data.talents;
-          game.items = data.items;
-          game.npcs = data.npcs;
-          game.achievements = data.achievements;
-          game.stats = data.stats;
-          game.lifeStage = data.lifeStage;
-          game.partner = data.partner;
-          game.gender = data.gender;
+          // 修正：game -> Game
+          Game.name = data.player;
+          Game.age = data.age;
+          Game.money = data.money;
+          Game.health = data.health;
+          Game.happy = data.happy;
+          Game.intel = data.intel;
+          Game.stamina = data.stamina;
+          Game.skills = data.skills;
+          Game.job = data.job;
+          Game.origin = data.origin;
+          Game.traits = data.traits;
+          Game.talents = data.talents;
+          Game.items = data.items;
+          Game.npcs = data.npcs;
+          Game.achievements = data.achievements;
+          Game.stats = data.stats;
+          Game.lifeStage = data.lifeStage;
+          Game.partner = data.partner;
+          Game.gender = data.gender;
 
           document.getElementById("scene-creation").style.display = "none";
           document.getElementById("scene-game").classList.add("active");
           document.getElementById("scene-game").style.display = "block";
 
           updateUI();
-          renderAll();
+          renderAll(); // 注意：若無 renderAll 函數可忽略，主要依賴 updateUI
 
           const date = new Date(data.timestamp);
           showPopup(`✅ 讀取成功！\n${date.toLocaleString("zh-TW")}`, "green");
@@ -2925,87 +3036,89 @@
           "家裡的書架上擺滿了諾貝爾獎章。父母對你的期許不是賺大錢，而是解開宇宙的奧祕。",
       };
 
-      // ✅ 確保這個函數完全覆蓋舊的同名函數
-      function finishCharacterCreation() {
-        // 1. 將選擇的特質加入遊戲
-        Game.traits = selectedTraits.map((id) =>
-          TRAITS.find((t) => t.id === id),
-        );
-        Game.unlockedTraits = [...selectedTraits];
+    // ✅ 修正與合併後的 finishCharacterCreation 函數
+function finishCharacterCreation() {
+    // 1. 將選擇的特質加入遊戲
+    // 注意：這裡使用 TRAITS (全大寫) 和 selectedTraits (全域變數)
+    Game.traits = selectedTraits.map((id) =>
+        TRAITS.find((t) => t.id === id),
+    );
+    Game.unlockedTraits = [...selectedTraits];
 
-        // 2. 應用特質效果與計算補償
-        let rewardMessages = [];
-        Game.traits.forEach((trait) => {
-          // 應用效果
-          if (trait.effect) {
+    // 2. 應用特質效果與計算補償
+    let rewardMessages = [];
+    Game.traits.forEach((trait) => {
+        // 應用效果
+        if (trait.effect) {
             trait.effect(Game);
-          }
+        }
 
-          // 計算負面特質獎勵
-          if (trait.isNegative && trait.reward) {
+        // 計算負面特質獎勵
+        if (trait.isNegative && trait.reward) {
             if (trait.reward.money) {
-              Game.money += trait.reward.money;
-              rewardMessages.push(
-                `💰 補償金 +${trait.reward.money.toLocaleString()}`,
-              );
+                Game.money += trait.reward.money;
+                rewardMessages.push(
+                    `💰 補償金 +$${trait.reward.money.toLocaleString()}`,
+                );
             }
             if (trait.reward.intel) {
-              Game.intel += trait.reward.intel;
-              rewardMessages.push(`🧠 智力 +${trait.reward.intel}`);
+                Game.intel += trait.reward.intel;
+                rewardMessages.push(`🧠 智力 +${trait.reward.intel}`);
             }
             if (trait.reward.health) {
-              Game.health += trait.reward.health;
-              rewardMessages.push(`❤️ 健康 +${trait.reward.health}`);
+                Game.health += trait.reward.health;
+                rewardMessages.push(`❤️ 健康 +${trait.reward.health}`);
             }
             if (trait.reward.happy) {
-              Game.happy += trait.reward.happy;
-              rewardMessages.push(`😊 快樂 +${trait.reward.happy}`);
+                Game.happy += trait.reward.happy;
+                rewardMessages.push(`😊 快樂 +${trait.reward.happy}`);
             }
             if (trait.reward.charm) {
-              Game.skills.charm += trait.reward.charm;
-              rewardMessages.push(`✨ 魅力 +${trait.reward.charm}`);
+                Game.skills.charm += trait.reward.charm;
+                rewardMessages.push(`✨ 魅力 +${trait.reward.charm}`);
             }
-          }
-        });
-
-        // 3. 顯示補償訊息
-        if (rewardMessages.length > 0) {
-          alert(`🎁 負面特質補償獎勵：\n\n${rewardMessages.join("\n")}`);
         }
+    });
 
-        // 4. 切換介面
-        document.getElementById("scene-creation").style.display = "none";
-        const gameScene = document.getElementById("scene-game");
-        gameScene.style.display = "block";
-        gameScene.classList.add("active");
+    // 3. 顯示補償訊息 (如果有)
+    if (rewardMessages.length > 0) {
+        alert(`🎁 負面特質補償獎勵：\n\n${rewardMessages.join("\n")}`);
+    }
 
-        // 5. 初始化遊戲各項顯示
-        updateUI();
-        renderJobs();
-        renderShop();
-        renderSocial();
-        renderAchievements();
-        renderStats();
+    // 4. 切換介面：隱藏創角，顯示遊戲主畫面
+    document.getElementById("scene-creation").style.display = "none";
+    const gameScene = document.getElementById("scene-game");
+    gameScene.style.display = "block";
+    gameScene.classList.add("active");
 
-        // 6. 寫入第一筆日誌
-        log(`👶 ${Game.name} 出生了！`);
-        log(`🏠 出身：${Game.origin}`);
-        log(`🎁 天賦：${Game.talents.map((t) => t.name).join("、")}`);
-        log(`✨ 特質：${Game.traits.map((t) => t.name).join("、")}`);
+    // 5. 初始化遊戲各項顯示
+    updateUI();
+    renderJobs();
+    renderShop();
+    renderSocial();
+    renderAchievements();
+    renderStats();
 
-        // 7. ✅ 觸發開場劇情 (使用 setTimeout 確保介面渲染完畢後彈出)
-        if (
-          typeof ORIGIN_STORY !== "undefined" &&
-          ORIGIN_STORY[Game.originId]
-        ) {
-          setTimeout(() => {
+    // 6. 寫入第一筆日誌
+    log(`👶 ${Game.name} 出生了！`);
+    log(`🏠 出身：${Game.origin}`);
+    log(`🎁 天賦：${Game.talents.map((t) => t.name).join("、")}`);
+    log(`✨ 特質：${Game.traits.map((t) => t.name).join("、")}`);
+
+    // 7. ✅ 觸發開場劇情 (最重要的部分)
+    // 這裡使用 setTimeout 延遲 500毫秒，確保介面切換完成後才彈出，體驗較好
+    if (
+        typeof ORIGIN_STORY !== "undefined" &&
+        ORIGIN_STORY[Game.originId]
+    ) {
+        setTimeout(() => {
             showModal("📖 人生篇章開啟", ORIGIN_STORY[Game.originId], [
-              { text: "開始冒險", action: () => closeModal() },
+                { text: "開始冒險", action: () => closeModal() },
             ]);
             log(ORIGIN_STORY[Game.originId]);
-          }, 500);
-        }
-      }
+        }, 500);
+    }
+}
       const JOBS = [
         {
           id: "none",
@@ -3329,55 +3442,57 @@
         },
       };
 
-      function checkPromotion() {
-        if (!game.job || game.job === "無業" || game.promotionChecked) return;
+     function checkPromotion() {
+        // 修正：game -> Game
+        if (!Game.job || Game.job === "無業" || Game.promotionChecked) return;
 
-        const promotion = JOB_PROMOTIONS[game.job];
+        const promotion = JOB_PROMOTIONS[Game.job]; // 修正：game -> Game
         if (!promotion) return;
 
         const req = promotion.requirement;
         let canPromote = true;
 
-        if (req.age && game.age < req.age) canPromote = false;
-        if (req.intel && game.intel < req.intel) canPromote = false;
-        if (req.communication && game.skills.communication < req.communication)
+        // 修正：game -> Game
+        if (req.age && Game.age < req.age) canPromote = false;
+        if (req.intel && Game.intel < req.intel) canPromote = false;
+        if (req.communication && Game.skills.communication < req.communication)
           canPromote = false;
-        if (req.leadership && game.skills.leadership < req.leadership)
+        if (req.leadership && Game.skills.leadership < req.leadership)
           canPromote = false;
-        if (req.workYears && game.workYears < req.workYears) canPromote = false;
+        if (req.workYears && Game.workYears < req.workYears) canPromote = false;
 
         if (canPromote) {
           showModal(
             "🎉 晉升機會",
-            `恭喜！你可以從「${game.job}」晉升為「${promotion.next}」\n薪水將增加 $${promotion.salaryIncrease.toLocaleString()}/年`,
+            `恭喜！你可以從「${Game.job}」晉升為「${promotion.next}」\n薪水將增加 $${promotion.salaryIncrease.toLocaleString()}/年`,
             "接受晉升",
             "暫不晉升",
             () => {
-              const currentJob = JOBS.find((j) => j.name === game.job);
-              game.job = promotion.next;
+              const currentJob = JOBS.find((j) => j.name === Game.job);
+              Game.job = promotion.next;
               if (currentJob) {
                 currentJob.salary += promotion.salaryIncrease;
               }
               log(`✨ 你晉升為 ${promotion.next}！`);
-              game.promotionChecked = true;
+              Game.promotionChecked = true;
               updateUI();
             },
             () => {
               log(`你選擇暫不晉升`);
-              game.promotionChecked = true;
+              Game.promotionChecked = true;
             },
           );
         }
       }
       // ==========================================
-      // 🆕 新增：子女養育系統
+      // 🆕 新增：子女養育系統 (已修正變數名稱)
       // ==========================================
       function createChild(name, age = 0) {
         return {
           name: name,
           age: age,
           health: 100,
-          intel: 50 + Math.floor(game.intel * 0.3),
+          intel: 50 + Math.floor(Game.intel * 0.3), // 修正：game -> Game
           personality: ["乖巧", "叛逆", "聰明", "運動", "文靜"][
             Math.floor(Math.random() * 5)
           ],
@@ -3388,17 +3503,17 @@
       }
 
       function tryHaveBaby() {
-        if (!game.partner) {
+        if (!Game.partner) { // 修正：game -> Game
           showPopup("❌ 需要先有伴侶", "red");
           return;
         }
 
-        if (game.age < 20 || game.age > 45) {
+        if (Game.age < 20 || Game.age > 45) { // 修正：game -> Game
           showPopup("❌ 年齡不適合生育 (20-45歲)", "red");
           return;
         }
 
-        if (game.money < 100000) {
+        if (Game.money < 100000) { // 修正：game -> Game
           showPopup("❌ 存款不足 $100,000", "red");
           return;
         }
@@ -3409,12 +3524,12 @@
           "🍼 準備好了",
           "❌ 暫不考慮",
           () => {
-            game.money -= 100000;
+            Game.money -= 100000; // 修正：game -> Game
             const babyName = prompt("請為寶寶取名：", "小寶") || "小寶";
             const baby = createChild(babyName, 0);
-            game.children.push(baby);
+            Game.children.push(baby); // 修正：game -> Game
             log(`🎉 恭喜！你的孩子 ${babyName} 出生了！`);
-            game.happy += 30;
+            Game.happy += 30; // 修正：game -> Game
             updateUI();
             renderChildrenList();
           },
@@ -3422,7 +3537,7 @@
       }
 
       function updateChildren() {
-        game.children.forEach((child) => {
+        Game.children.forEach((child) => { // 修正：game -> Game
           child.age++;
 
           if (child.age === 6) child.education = "小學";
@@ -3439,8 +3554,8 @@
                 log(`${child.name} 開始工作了！`);
               },
               () => {
-                if (game.money >= 200000) {
-                  game.money -= 200000;
+                if (Game.money >= 200000) { // 修正：game -> Game
+                  Game.money -= 200000;
                   child.education = "大學";
                   child.intel += 30;
                   log(`${child.name} 進入大學就讀！`);
@@ -3453,7 +3568,7 @@
 
           let cost = child.expenses;
           if (child.education === "大學") cost += 50000;
-          game.money -= cost;
+          Game.money -= cost; // 修正：game -> Game
 
           if (child.education !== "就業") {
             child.intel += Math.floor(Math.random() * 3 + 1);
@@ -3462,7 +3577,7 @@
       }
 
       function interactWithChild(childIndex) {
-        const child = game.children[childIndex];
+        const child = Game.children[childIndex]; // 修正：game -> Game
         if (!child) return;
 
         showModal(
@@ -3471,10 +3586,10 @@
           "🎮 陪伴玩耍 (-20體力)",
           "📖 輔導功課 (-30體力)",
           () => {
-            if (game.stamina >= 20) {
-              game.stamina -= 20;
+            if (Game.stamina >= 20) { // 修正：game -> Game
+              Game.stamina -= 20;
               child.relationship = Math.min(100, child.relationship + 5);
-              game.happy += 10;
+              Game.happy += 10;
               log(`陪 ${child.name} 玩耍，關係更親密了！`);
               updateUI();
             } else {
@@ -3482,8 +3597,8 @@
             }
           },
           () => {
-            if (game.stamina >= 30 && game.intel >= 80) {
-              game.stamina -= 30;
+            if (Game.stamina >= 30 && Game.intel >= 80) { // 修正：game -> Game
+              Game.stamina -= 30;
               child.intel += 3;
               child.relationship = Math.min(100, child.relationship + 3);
               log(`輔導 ${child.name} 功課，智力提升了！`);
@@ -3499,13 +3614,13 @@
         const container = document.getElementById("children-list");
         if (!container) return;
 
-        if (game.children.length === 0) {
+        if (Game.children.length === 0) { // 修正：game -> Game
           container.innerHTML =
             '<div style="color: var(--text-dim); text-align: center; padding: 10px;">尚無子女</div>';
           return;
         }
 
-        container.innerHTML = game.children
+        container.innerHTML = Game.children // 修正：game -> Game
           .map(
             (child, index) => `
     <div class="job-card" onclick="interactWithChild(${index})" style="cursor: pointer;">
@@ -3524,40 +3639,40 @@
           )
           .join("");
       }
-      // ==========================================
-      // 🆕 新增：通膨與房貸系統
+     // ==========================================
+      // 🆕 新增：通膨與房貸系統 (已修正變數名稱)
       // ==========================================
       function updateInflation() {
-        game.yearsPassed++;
-        if (game.yearsPassed % 5 === 0) {
-          game.inflationRate *= 1.03;
+        Game.yearsPassed++; // 修正：game -> Game
+        if (Game.yearsPassed % 5 === 0) {
+          Game.inflationRate *= 1.03;
           log(`💸 物價上漲了 3%`);
         }
       }
 
       function getInflatedPrice(basePrice) {
-        return Math.floor(basePrice * game.inflationRate);
+        return Math.floor(basePrice * Game.inflationRate); // 修正：game -> Game
       }
 
       function payMortgage() {
-        if (game.mortgage.active) {
-          if (game.money >= game.mortgage.monthlyPayment) {
-            game.money -= game.mortgage.monthlyPayment;
-            game.mortgage.remaining -= game.mortgage.monthlyPayment;
-            game.mortgage.years--;
+        if (Game.mortgage.active) { // 修正：game -> Game
+          if (Game.money >= Game.mortgage.monthlyPayment) {
+            Game.money -= Game.mortgage.monthlyPayment;
+            Game.mortgage.remaining -= Game.mortgage.monthlyPayment;
+            Game.mortgage.years--;
 
-            if (game.mortgage.remaining <= 0 || game.mortgage.years <= 0) {
+            if (Game.mortgage.remaining <= 0 || Game.mortgage.years <= 0) {
               log(`🎉 房貸繳清了！`);
-              game.mortgage.active = false;
+              Game.mortgage.active = false;
             } else {
               log(
-                `繳房貸 $${game.mortgage.monthlyPayment.toLocaleString()}，剩 ${game.mortgage.years} 年`,
+                `繳房貸 $${Game.mortgage.monthlyPayment.toLocaleString()}，剩 ${Game.mortgage.years} 年`,
               );
             }
           } else {
             log(`⚠️ 無法繳納房貸！健康與快樂下降`);
-            game.health -= 10;
-            game.happy -= 15;
+            Game.health -= 10;
+            Game.happy -= 15;
           }
         }
       }
@@ -3573,25 +3688,25 @@
           "💰 全額付清",
           "🏦 申請貸款",
           () => {
-            if (game.money >= realPrice) {
-              game.money -= realPrice;
-              game.items.push(house.name);
-              if (house.happyBonus) game.happy += house.happyBonus;
+            if (Game.money >= realPrice) { // 修正：game -> Game
+              Game.money -= realPrice;
+              Game.items.push(house.name);
+              if (house.happyBonus) Game.happy += house.happyBonus;
               log(`全額購買了 ${house.name}！`);
               updateUI();
-              renderAssets();
+              renderAssets(); // 注意：若無 renderAssets 可忽略
             } else {
               showPopup("❌ 金錢不足", "red");
             }
           },
           () => {
-            if (game.money >= downPayment) {
-              if (game.mortgage.active) {
+            if (Game.money >= downPayment) {
+              if (Game.mortgage.active) {
                 showPopup("❌ 已有貸款進行中", "red");
                 return;
               }
-              game.money -= downPayment;
-              game.mortgage = {
+              Game.money -= downPayment;
+              Game.mortgage = {
                 active: true,
                 totalAmount: loanAmount,
                 remaining: loanAmount,
@@ -3599,13 +3714,13 @@
                 years: 20,
                 itemName: house.name,
               };
-              game.items.push(house.name);
-              if (house.happyBonus) game.happy += house.happyBonus;
+              Game.items.push(house.name);
+              if (house.happyBonus) Game.happy += house.happyBonus;
               log(
-                `貸款購買了 ${house.name}！每年繳納 $${game.mortgage.monthlyPayment.toLocaleString()}`,
+                `貸款購買了 ${house.name}！每年繳納 $${Game.mortgage.monthlyPayment.toLocaleString()}`,
               );
               updateUI();
-              renderAssets();
+              renderAssets(); // 注意：若無 renderAssets 可忽略
             } else {
               showPopup("❌ 頭期款不足", "red");
             }
@@ -5693,18 +5808,40 @@
         });
 
         // 技能條
-        let skillHtml = `
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-weight: bold; color: var(--accent);">📊 技能數值</span>
-              <button onclick="toggleSkills()"
-                      style="padding: 5px 12px; font-size: 0.85em; background: rgba(255,255,255,0.1);
-                             border: 1px solid var(--accent); border-radius: 5px; cursor: pointer;">
-                  ${skillsCollapsed ? "▼ 展開" : "▲ 收起"}
-              </button>
-          </div>
-      `;
+        /// ... 在 updateUI 函數內 ...
 
-        if (!skillsCollapsed) {
+        // ✅ 生成技能標籤
+        let skillHtml = ''; 
+        
+        const skillNames = {
+          programming: "💻 程式", // 加點圖示更生動
+          art: "🎨 藝術",
+          medical: "⚕️ 醫療",
+          cooking: "🍳 烹飪",
+          finance: "💰 理財",
+          communication: "🗣️ 溝通",
+          charm: "✨ 魅力",
+        };
+
+        // 遍歷技能
+        Object.keys(Game.skills).forEach((key) => {
+          const val = Math.floor(Game.skills[key]);
+          if (val > 0) { // 數值 > 0 才顯示
+            skillHtml += `
+                <div class="skill-tag">
+                    ${skillNames[key] || key} <span class="skill-val">${val}</span>
+                </div>
+            `;
+          }
+        });
+
+        // 若無技能
+        if (skillHtml === '') {
+            skillHtml = '<span style="font-size: 0.8em; color: var(--text-dim); opacity: 0.5;">( 尚未習得技能 )</span>';
+        }
+
+        document.getElementById("skills-container").innerHTML = skillHtml;
+       if (!skillsCollapsed) {
           const skillNames = {
             programming: "程式",
             art: "藝術",
@@ -5715,21 +5852,22 @@
             charm: "魅力",
           };
 
+          // ✅ 修改：改成 Grid 佈局，讓技能像屬性面板一樣排列
+          skillHtml += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">';
+
           Object.keys(Game.skills).forEach((key) => {
-            const val = Math.min(200, Math.floor(Game.skills[key]));
-            const percent = (val / 200) * 100;
+            const val = Math.floor(Game.skills[key]); // 取整數，無上限
+
+            // ✅ 修改：移除進度條，改用精緻的數值卡片樣式
             skillHtml += `
-                  <div class="skill-item">
-                      <div class="skill-header">
-                          <span>${skillNames[key]}</span>
-                          <span>${val}</span>
-                      </div>
-                      <div class="skill-bar-bg">
-                          <div class="skill-bar-fill" style="width: ${percent}%"></div>
-                      </div>
+                  <div class="skill-item" style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                      <span style="color: var(--text-dim); font-size: 0.9em;">${skillNames[key]}</span>
+                      <span style="color: var(--gold); font-weight: bold; font-size: 1.1em;">${val}</span>
                   </div>
               `;
           });
+          
+          skillHtml += '</div>';
         }
 
         document.getElementById("skills-container").innerHTML = skillHtml;
