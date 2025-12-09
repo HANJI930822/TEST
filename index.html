@@ -1960,15 +1960,15 @@
         },
       ];
       // ==========================================
-      // 🆕 新增：存檔系統 (已修正變數名稱)
+      // 🆕 新增：存檔系統 (已修正變數名稱 Game)
       // ==========================================
       const SAVE_KEY = "lifeSimV17_save";
 
-     function saveGame() {
+      function saveGame() {
         const saveData = {
           version: "17.0",
           timestamp: Date.now(),
-          player: Game.name, // 修正：game -> Game
+          player: Game.name, // ✅ 修正：game -> Game
           age: Game.age,
           money: Game.money,
           health: Game.health,
@@ -2009,7 +2009,7 @@
 
           const data = JSON.parse(saved);
 
-          // 修正：game -> Game
+          // ✅ 修正：game -> Game
           Game.name = data.player;
           Game.age = data.age;
           Game.money = data.money;
@@ -2035,7 +2035,7 @@
           document.getElementById("scene-game").style.display = "block";
 
           updateUI();
-          // renderAll(); // 這一行如果報錯可以拿掉，因為 updateUI 已經做了大部分工作
+          // renderAll(); 
 
           const date = new Date(data.timestamp);
           showPopup(`✅ 讀取成功！\n${date.toLocaleString("zh-TW")}`, "green");
@@ -3443,16 +3443,15 @@ function finishCharacterCreation() {
       };
 
    function checkPromotion() {
-        // 修正：game -> Game
+        // ✅ 修正：game -> Game
         if (!Game.job || Game.job === "無業" || Game.promotionChecked) return;
 
-        const promotion = JOB_PROMOTIONS[Game.job]; // 修正：game -> Game
+        const promotion = JOB_PROMOTIONS[Game.job];
         if (!promotion) return;
 
         const req = promotion.requirement;
         let canPromote = true;
 
-        // 修正：game -> Game
         if (req.age && Game.age < req.age) canPromote = false;
         if (req.intel && Game.intel < req.intel) canPromote = false;
         if (req.communication && Game.skills.communication < req.communication)
@@ -3485,14 +3484,14 @@ function finishCharacterCreation() {
         }
       }
       // ==========================================
-      // 🆕 新增：子女養育系統 (已修正變數名稱)
+      // 🆕 新增：子女養育系統 (已修正變數名稱 Game)
       // ==========================================
       function createChild(name, age = 0) {
         return {
           name: name,
           age: age,
           health: 100,
-          intel: 50 + Math.floor(Game.intel * 0.3), // 修正：game -> Game
+          intel: 50 + Math.floor(Game.intel * 0.3), // ✅ 修正：game -> Game
           personality: ["乖巧", "叛逆", "聰明", "運動", "文靜"][
             Math.floor(Math.random() * 5)
           ],
@@ -3503,17 +3502,17 @@ function finishCharacterCreation() {
       }
 
       function tryHaveBaby() {
-        if (!Game.partner) { // 修正：game -> Game
+        if (!Game.partner) { // ✅ 修正：game -> Game
           showPopup("❌ 需要先有伴侶", "red");
           return;
         }
 
-        if (Game.age < 20 || Game.age > 45) { // 修正：game -> Game
+        if (Game.age < 20 || Game.age > 45) {
           showPopup("❌ 年齡不適合生育 (20-45歲)", "red");
           return;
         }
 
-        if (Game.money < 100000) { // 修正：game -> Game
+        if (Game.money < 100000) {
           showPopup("❌ 存款不足 $100,000", "red");
           return;
         }
@@ -3524,12 +3523,12 @@ function finishCharacterCreation() {
           "🍼 準備好了",
           "❌ 暫不考慮",
           () => {
-            Game.money -= 100000; // 修正：game -> Game
+            Game.money -= 100000;
             const babyName = prompt("請為寶寶取名：", "小寶") || "小寶";
             const baby = createChild(babyName, 0);
-            Game.children.push(baby); // 修正：game -> Game
+            Game.children.push(baby); // ✅ 修正：game -> Game
             log(`🎉 恭喜！你的孩子 ${babyName} 出生了！`);
-            Game.happy += 30; // 修正：game -> Game
+            Game.happy += 30;
             updateUI();
             renderChildrenList();
           },
@@ -3537,7 +3536,7 @@ function finishCharacterCreation() {
       }
 
       function updateChildren() {
-        Game.children.forEach((child) => { // 修正：game -> Game
+        Game.children.forEach((child) => { // ✅ 修正：game -> Game
           child.age++;
 
           if (child.age === 6) child.education = "小學";
@@ -3554,7 +3553,7 @@ function finishCharacterCreation() {
                 log(`${child.name} 開始工作了！`);
               },
               () => {
-                if (Game.money >= 200000) { // 修正：game -> Game
+                if (Game.money >= 200000) {
                   Game.money -= 200000;
                   child.education = "大學";
                   child.intel += 30;
@@ -3568,7 +3567,7 @@ function finishCharacterCreation() {
 
           let cost = child.expenses;
           if (child.education === "大學") cost += 50000;
-          Game.money -= cost; // 修正：game -> Game
+          Game.money -= cost;
 
           if (child.education !== "就業") {
             child.intel += Math.floor(Math.random() * 3 + 1);
@@ -3577,7 +3576,7 @@ function finishCharacterCreation() {
       }
 
       function interactWithChild(childIndex) {
-        const child = Game.children[childIndex]; // 修正：game -> Game
+        const child = Game.children[childIndex]; // ✅ 修正：game -> Game
         if (!child) return;
 
         showModal(
@@ -3586,7 +3585,7 @@ function finishCharacterCreation() {
           "🎮 陪伴玩耍 (-20體力)",
           "📖 輔導功課 (-30體力)",
           () => {
-            if (Game.stamina >= 20) { // 修正：game -> Game
+            if (Game.stamina >= 20) {
               Game.stamina -= 20;
               child.relationship = Math.min(100, child.relationship + 5);
               Game.happy += 10;
@@ -3597,7 +3596,7 @@ function finishCharacterCreation() {
             }
           },
           () => {
-            if (Game.stamina >= 30 && Game.intel >= 80) { // 修正：game -> Game
+            if (Game.stamina >= 30 && Game.intel >= 80) {
               Game.stamina -= 30;
               child.intel += 3;
               child.relationship = Math.min(100, child.relationship + 3);
@@ -3614,36 +3613,36 @@ function finishCharacterCreation() {
         const container = document.getElementById("children-list");
         if (!container) return;
 
-        if (Game.children.length === 0) { // 修正：game -> Game
+        if (Game.children.length === 0) { // ✅ 修正：game -> Game
           container.innerHTML =
             '<div style="color: var(--text-dim); text-align: center; padding: 10px;">尚無子女</div>';
           return;
         }
 
-        container.innerHTML = Game.children // 修正：game -> Game
+        container.innerHTML = Game.children
           .map(
             (child, index) => `
-            <div class="job-card" onclick="interactWithChild(${index})" style="cursor: pointer;">
-              <div class="job-name">${child.name} (${child.age}歲)</div>
-              <div style="font-size: 0.85em; color: var(--text-dim); margin-top: 5px;">
-                ${child.personality} | ${child.education} | 智力 ${child.intel}
-              </div>
-              <div style="font-size: 0.8em; color: var(--green); margin-top: 3px;">
-                關係：${"❤️".repeat(Math.floor(child.relationship / 20))} ${child.relationship}/100
-              </div>
-              <div style="font-size: 0.75em; color: var(--orange); margin-top: 2px;">
-                年度花費：$${child.education === "大學" ? (child.expenses + 50000).toLocaleString() : child.expenses.toLocaleString()}
-              </div>
-            </div>
-            `,
+    <div class="job-card" onclick="interactWithChild(${index})" style="cursor: pointer;">
+      <div class="job-name">${child.name} (${child.age}歲)</div>
+      <div style="font-size: 0.85em; color: var(--text-dim); margin-top: 5px;">
+        ${child.personality} | ${child.education} | 智力 ${child.intel}
+      </div>
+      <div style="font-size: 0.8em; color: var(--green); margin-top: 3px;">
+        關係：${"❤️".repeat(Math.floor(child.relationship / 20))} ${child.relationship}/100
+      </div>
+      <div style="font-size: 0.75em; color: var(--orange); margin-top: 2px;">
+        年度花費：$${child.education === "大學" ? (child.expenses + 50000).toLocaleString() : child.expenses.toLocaleString()}
+      </div>
+    </div>
+  `,
           )
           .join("");
       }
-    // ==========================================
-      // 🆕 新增：通膨與房貸系統 (已修正變數名稱)
+   // ==========================================
+      // 🆕 新增：通膨與房貸系統 (已修正變數名稱 Game)
       // ==========================================
       function updateInflation() {
-        Game.yearsPassed++; // 修正：game -> Game
+        Game.yearsPassed++; // ✅ 修正：game -> Game
         if (Game.yearsPassed % 5 === 0) {
           Game.inflationRate *= 1.03;
           log(`💸 物價上漲了 3%`);
@@ -3651,11 +3650,11 @@ function finishCharacterCreation() {
       }
 
       function getInflatedPrice(basePrice) {
-        return Math.floor(basePrice * Game.inflationRate); // 修正：game -> Game
+        return Math.floor(basePrice * Game.inflationRate); // ✅ 修正：game -> Game
       }
 
       function payMortgage() {
-        if (Game.mortgage.active) { // 修正：game -> Game
+        if (Game.mortgage.active) { // ✅ 修正：game -> Game
           if (Game.money >= Game.mortgage.monthlyPayment) {
             Game.money -= Game.mortgage.monthlyPayment;
             Game.mortgage.remaining -= Game.mortgage.monthlyPayment;
@@ -3688,13 +3687,13 @@ function finishCharacterCreation() {
           "💰 全額付清",
           "🏦 申請貸款",
           () => {
-            if (Game.money >= realPrice) { // 修正：game -> Game
+            if (Game.money >= realPrice) { // ✅ 修正：game -> Game
               Game.money -= realPrice;
               Game.items.push(house.name);
               if (house.happyBonus) Game.happy += house.happyBonus;
               log(`全額購買了 ${house.name}！`);
               updateUI();
-              renderAssets(); 
+              renderAssets();
             } else {
               showPopup("❌ 金錢不足", "red");
             }
@@ -3720,7 +3719,7 @@ function finishCharacterCreation() {
                 `貸款購買了 ${house.name}！每年繳納 $${Game.mortgage.monthlyPayment.toLocaleString()}`,
               );
               updateUI();
-              renderAssets(); 
+              renderAssets();
             } else {
               showPopup("❌ 頭期款不足", "red");
             }
@@ -3761,7 +3760,7 @@ function finishCharacterCreation() {
         checkPromotion();
 
         // 每5年自動存檔
-        if (Game.age % 5 === 0) { // 修正：game -> Game
+        if (Game.age % 5 === 0) { // ✅ 修正：game -> Game
           saveGame();
         }
 
