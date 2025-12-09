@@ -1964,7 +1964,7 @@
       // ==========================================
       const SAVE_KEY = "lifeSimV17_save";
 
-      function saveGame() {
+     function saveGame() {
         const saveData = {
           version: "17.0",
           timestamp: Date.now(),
@@ -2035,7 +2035,7 @@
           document.getElementById("scene-game").style.display = "block";
 
           updateUI();
-          renderAll(); // 注意：若無 renderAll 函數可忽略，主要依賴 updateUI
+          // renderAll(); // 這一行如果報錯可以拿掉，因為 updateUI 已經做了大部分工作
 
           const date = new Date(data.timestamp);
           showPopup(`✅ 讀取成功！\n${date.toLocaleString("zh-TW")}`, "green");
@@ -3442,7 +3442,7 @@ function finishCharacterCreation() {
         },
       };
 
-     function checkPromotion() {
+   function checkPromotion() {
         // 修正：game -> Game
         if (!Game.job || Game.job === "無業" || Game.promotionChecked) return;
 
@@ -3623,23 +3623,23 @@ function finishCharacterCreation() {
         container.innerHTML = Game.children // 修正：game -> Game
           .map(
             (child, index) => `
-    <div class="job-card" onclick="interactWithChild(${index})" style="cursor: pointer;">
-      <div class="job-name">${child.name} (${child.age}歲)</div>
-      <div style="font-size: 0.85em; color: var(--text-dim); margin-top: 5px;">
-        ${child.personality} | ${child.education} | 智力 ${child.intel}
-      </div>
-      <div style="font-size: 0.8em; color: var(--green); margin-top: 3px;">
-        關係：${"❤️".repeat(Math.floor(child.relationship / 20))} ${child.relationship}/100
-      </div>
-      <div style="font-size: 0.75em; color: var(--orange); margin-top: 2px;">
-        年度花費：$${child.education === "大學" ? (child.expenses + 50000).toLocaleString() : child.expenses.toLocaleString()}
-      </div>
-    </div>
-  `,
+            <div class="job-card" onclick="interactWithChild(${index})" style="cursor: pointer;">
+              <div class="job-name">${child.name} (${child.age}歲)</div>
+              <div style="font-size: 0.85em; color: var(--text-dim); margin-top: 5px;">
+                ${child.personality} | ${child.education} | 智力 ${child.intel}
+              </div>
+              <div style="font-size: 0.8em; color: var(--green); margin-top: 3px;">
+                關係：${"❤️".repeat(Math.floor(child.relationship / 20))} ${child.relationship}/100
+              </div>
+              <div style="font-size: 0.75em; color: var(--orange); margin-top: 2px;">
+                年度花費：$${child.education === "大學" ? (child.expenses + 50000).toLocaleString() : child.expenses.toLocaleString()}
+              </div>
+            </div>
+            `,
           )
           .join("");
       }
-     // ==========================================
+    // ==========================================
       // 🆕 新增：通膨與房貸系統 (已修正變數名稱)
       // ==========================================
       function updateInflation() {
@@ -3694,7 +3694,7 @@ function finishCharacterCreation() {
               if (house.happyBonus) Game.happy += house.happyBonus;
               log(`全額購買了 ${house.name}！`);
               updateUI();
-              renderAssets(); // 注意：若無 renderAssets 可忽略
+              renderAssets(); 
             } else {
               showPopup("❌ 金錢不足", "red");
             }
@@ -3720,236 +3720,175 @@ function finishCharacterCreation() {
                 `貸款購買了 ${house.name}！每年繳納 $${Game.mortgage.monthlyPayment.toLocaleString()}`,
               );
               updateUI();
-              renderAssets(); // 注意：若無 renderAssets 可忽略
+              renderAssets(); 
             } else {
               showPopup("❌ 頭期款不足", "red");
             }
           },
         );
       }
+      
+      // ✅ 這是最關鍵的修復！nextYear 函數
+      function nextYear() {
+        // 防抖检查
+        if (isProcessing) {
+          console.log("⏳ 處理中，請稍候...");
+          return;
+        }
 
-      const ACHIEVEMENTS = [
-        {
-          id: "first_job",
-          name: "初入職場",
-          desc: "獲得第一份工作",
-          icon: "💼",
-          check: (g) => g.jobId !== "none",
-        },
-        {
-          id: "millionaire",
-          name: "百萬富翁",
-          desc: "資產達到100萬",
-          icon: "💰",
-          check: (g) => g.money >= 1000000,
-        },
-        {
-          id: "ten_million",
-          name: "千萬富豪",
-          desc: "資產達到1000萬",
-          icon: "💎",
-          check: (g) => g.money >= 10000000,
-        },
-        {
-          id: "billionaire",
-          name: "億萬富翁",
-          desc: "資產達到1億",
-          icon: "🏆",
-          check: (g) => g.money >= 100000000,
-        },
-        {
-          id: "genius",
-          name: "天才",
-          desc: "智力達到150",
-          icon: "🧠",
-          check: (g) => g.intel >= 150,
-        },
-        {
-          id: "charming",
-          name: "萬人迷",
-          desc: "魅力達到120",
-          icon: "✨",
-          check: (g) => g.skills.charm >= 120,
-        },
-        {
-          id: "healthy",
-          name: "健康達人",
-          desc: "60歲時健康仍>80",
-          icon: "💪",
-          check: (g) => g.age >= 60 && g.health > 80,
-        },
-        {
-          id: "happy_life",
-          name: "快樂人生",
-          desc: "保持快樂值>80達30年",
-          icon: "😊",
-          check: (g) => g.happyYears >= 30,
-        },
-        {
-          id: "social_master",
-          name: "社交達人",
-          desc: "擁有5個以上好友",
-          icon: "👥",
-          check: (g) =>
-            g.relationships.filter((r) => r.type === "friend").length >= 5,
-        },
-        {
-          id: "married",
-          name: "執子之手",
-          desc: "成功結婚",
-          icon: "💍",
-          check: (g) => g.relationships.some((r) => r.id.startsWith("spouse")),
-        },
-        {
-          id: "parent",
-          name: "為人父母",
-          desc: "擁有子女",
-          icon: "👶",
-          check: (g) => g.relationships.some((r) => r.type === "child"),
-        },
-        {
-          id: "house_owner",
-          name: "有房一族",
-          desc: "購買第一間房產",
-          icon: "🏘️",
-          check: (g) => g.inventory.some((i) => i.startsWith("house")),
-        },
-        {
-          id: "car_owner",
-          name: "有車一族",
-          desc: "購買第一輛車",
-          icon: "🏎️",
-          check: (g) => g.inventory.some((i) => i.startsWith("car")),
-        },
-        {
-          id: "skill_master",
-          name: "全能天才",
-          desc: "所有技能達到80",
-          icon: "🌟",
-          check: (g) => Object.values(g.skills).every((v) => v >= 80),
-        },
-        {
-          id: "elder",
-          name: "長壽",
-          desc: "活到80歲",
-          icon: "🎂",
-          check: (g) => g.age >= 80,
-        },
-        {
-          id: "centenarian",
-          name: "人瑞",
-          desc: "活到100歲",
-          icon: "🎊",
-          check: (g) => g.age >= 100,
-        },
-        {
-          id: "perfect",
-          name: "完美人生",
-          desc: "60歲時健康/快樂/金錢都>高標",
-          icon: "👑",
-          check: (g) =>
-            g.age >= 60 && g.health > 80 && g.happy > 80 && g.money > 10000000,
-        },
-        {
-          id: "workaholic",
-          name: "工作狂",
-          desc: "在同一職位工作超過20年",
-          icon: "📊",
-          check: (g) => g.jobYears >= 20,
-        },
-        {
-          id: "debt_free",
-          name: "無債一身輕",
-          desc: "從負債狀態翻身到資產100萬",
-          icon: "🎯",
-          check: (g) => g.hasBeenInDebt && g.money >= 1000000,
-        },
-        {
-          id: "rags_to_riches",
-          name: "屌絲逆襲",
-          desc: "從貧困出身成為億萬富翁",
-          icon: "🚀",
-          check: (g) =>
-            ["genius", "single_parent", "orphan", "farmer"].includes(
-              g.originId,
-            ) && g.money >= 100000000,
-        },
+        if (Game.health <= 0) {
+          showEnding();
+          return;
+        }
 
-        {
-          id: "royal_glory",
-          name: "王者歸來",
-          desc: "【皇室貴族】資產達10億",
-          icon: "👑",
-          check: (g) => g.originId === "royal" && g.money >= 1000000000,
-        },
+        isProcessing = true; 
 
-        {
-          id: "hacker_legend",
-          name: "暗網傳說",
-          desc: "【駭客世家】程式設計達180",
-          icon: "💻",
-          check: (g) => g.originId === "hacker" && g.skills.programming >= 180,
-        },
+        const oldStage = LIFE_STAGES.find(
+          (s) => Game.age >= s.min && Game.age <= s.max,
+        );
 
-        {
-          id: "monk_enlightenment",
-          name: "得道高僧",
-          desc: "【寺廟修行】80歲時快樂>90",
-          icon: "🙏",
-          check: (g) => g.originId === "monk" && g.age >= 80 && g.happy > 90,
-        },
+        Game.age++;
+        Game.stamina = 100;
+        
+        // ✅ 這裡原本是 game，導致崩潰
+        Game.workYears++;
+        Game.promotionChecked = false;
+        
+        // 這些函數現在內部也修正為 Game 了
+        updateInflation();
+        payMortgage();
+        updateChildren();
+        checkPromotion();
 
-        {
-          id: "mafia_boss",
-          name: "黑道教父",
-          desc: "【黑道世家】魅力150+資產5000萬",
-          icon: "🗡️",
-          check: (g) =>
-            g.originId === "mafia" &&
-            g.skills.charm >= 150 &&
-            g.money >= 50000000,
-        },
+        // 每5年自動存檔
+        if (Game.age % 5 === 0) { // 修正：game -> Game
+          saveGame();
+        }
 
-        {
-          id: "esports_champion",
-          name: "電競冠軍",
-          desc: "【電競世家】30歲前資產3000萬",
-          icon: "🎮",
-          check: (g) =>
-            g.originId === "esports" && g.age <= 30 && g.money >= 30000000,
-        },
+        const newStage = LIFE_STAGES.find(
+          (s) => Game.age >= s.min && Game.age <= s.max,
+        );
 
-        {
-          id: "spy_master",
-          name: "諜報大師",
-          desc: "【情報員後代】智力150+健康80",
-          icon: "🕵️",
-          check: (g) =>
-            g.originId === "spy" && g.intel >= 150 && g.health >= 80,
-        },
+        // 生活成本系统
+        let livingCost = 0;
+        if (Game.age >= 18 && Game.age < 25) {
+          livingCost = 15000;
+        } else if (Game.age >= 25 && Game.age < 40) {
+          livingCost = 30000;
+        } else if (Game.age >= 40 && Game.age < 60) {
+          livingCost = 50000;
+        } else if (Game.age >= 60) {
+          livingCost = 70000;
+        }
 
-        {
-          id: "fashion_icon",
-          name: "時尚教主",
-          desc: "【時尚名門】魅力160+資產5000萬",
-          icon: "👗",
-          check: (g) =>
-            g.originId === "fashion" &&
-            g.skills.charm >= 160 &&
-            g.money >= 50000000,
-        },
-      ];
+        const hasHouse = Game.inventory.some((i) => i.startsWith("house"));
+        if (hasHouse) {
+          livingCost = Math.floor(livingCost * 0.6);
+        }
 
-      const LIFE_STAGES = [
-        { min: 0, max: 2, name: "嬰兒期", icon: "👶" },
-        { min: 3, max: 5, name: "幼兒期", icon: "🧒" },
-        { min: 6, max: 12, name: "兒童期", icon: "👦" },
-        { min: 13, max: 17, name: "青少年", icon: "🧑" },
-        { min: 18, max: 25, name: "青年期", icon: "👨" },
-        { min: 26, max: 40, name: "壯年期", icon: "👨‍💼" },
-        { min: 41, max: 60, name: "中年期", icon: "👨‍🦳" },
-        { min: 61, max: 999, name: "老年期", icon: "👴" },
-      ];
+        const hasCar = Game.inventory.some((i) => i.startsWith("car"));
+        if (hasCar) {
+          livingCost += 12000;
+        }
+
+        if (livingCost > 0) {
+          Game.money -= livingCost;
+          log(`💸 年度生活費 -${livingCost.toLocaleString()}`);
+        }
+
+        // 随机突发事件
+        if (Math.random() < 0.15) {
+          const emergencies = [
+            { name: "📱 手機壞掉", cost: 8000 },
+            { name: "🏥 突發疾病", cost: 15000 },
+            { name: "💻 電腦故障", cost: 12000 },
+            { name: "🚗 車輛維修", cost: 20000 },
+            { name: "👨‍👩‍👧 家人急用", cost: 25000 },
+            { name: "🏠 房屋維修", cost: 30000 },
+          ];
+          const emergency =
+            emergencies[Math.floor(Math.random() * emergencies.length)];
+          Game.money -= emergency.cost;
+          Game.happy -= 5;
+          log(`⚠️ ${emergency.name} -${emergency.cost.toLocaleString()}`);
+        }
+
+        updateNPCLifecycle();
+
+        const yearChanges = [];
+
+        if (Game.yearlyMoney > 0) {
+          Game.money += Game.yearlyMoney;
+          yearChanges.push(`💰 +${Game.yearlyMoney.toLocaleString()}`);
+        }
+
+        Game.inventory.forEach((item) => {
+          const house = HOUSES.find((h) => h.id === item);
+          if (house && house.passive) {
+            Game.money += house.passive;
+            yearChanges.push(
+              `🏠 ${house.name} +${house.passive.toLocaleString()}`,
+            );
+          }
+        });
+
+        Game.health -= Math.floor(5 * Game.healthDecay);
+        Game.happy -= Math.floor(3 * Game.happyDecay);
+
+        if (Game.happy > 80) Game.happyYears++;
+
+        if (Game.money < 0) {
+          Game.hasBeenInDebt = true;
+          log("⚠️ 陷入負債！");
+        }
+
+        if (yearChanges.length > 0) {
+          log(`📅 ${Game.age} 歲：${yearChanges.join("、")}`);
+        }
+
+        if (oldStage && newStage && oldStage.name !== newStage.name) {
+          log(`🎂 進入新階段：${newStage.icon} ${newStage.name}`);
+
+          const toast = document.createElement("div");
+          toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: bold;
+            z-index: 400;
+            box-shadow: 0 8px 25px rgba(187, 134, 252, 0.6);
+            animation: slideIn 0.5s;
+            font-size: 1.2em;
+            border: 3px solid white;
+        `;
+          toast.innerHTML = `${newStage.icon} 進入 ${newStage.name}`;
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+            toast.style.animation = "slideIn 0.5s reverse";
+            setTimeout(() => {
+              if (toast.parentNode) {
+                document.body.removeChild(toast);
+              }
+            }, 500);
+          }, 2000);
+        }
+
+        checkAchievements();
+
+        updateUI();
+        renderChildrenList(); 
+        
+        // 延遲解鎖，讓按鈕恢復可用
+        setTimeout(() => {
+          isProcessing = false;
+        }, 300);
+      }
       // ===== 🏫 教育系統 =====
       // ===== 🏫 教育系統（台灣學校版）=====
       const EDUCATION_LEVELS = [
@@ -5906,7 +5845,7 @@ function finishCharacterCreation() {
         updateActionButtons();
       }
 
-      function updateActionButtons() {
+     function updateActionButtons() {
         const btns = document.getElementById("action-buttons");
         let html = "";
         const age = Game.age;
@@ -6018,20 +5957,28 @@ function finishCharacterCreation() {
         return actionNames[type] || "";
       }
 
+    // ✅ 修正後的 action 函數 (確保 ID 與 HTML 一致)
       function action(type) {
-        if (isProcessing) return; // 防抖
+        // 1. 防抖動檢查
+        if (isProcessing) {
+            console.log("⏳ 處理中，請稍候...");
+            return; 
+        }
 
+        // 2. 體力檢查
         if (Game.stamina <= 0) {
           alert("❌ 體力不足！");
           return;
         }
 
+        // 3. 鎖定狀態
         isProcessing = true;
+        
         let cost = 20;
         let effects = {};
         let actionName = "";
 
-        // ✅ 修正：Switch Case ID 必須跟 HTML 按鈕的 onclick 參數完全一致
+        // 4. Switch Case (ID 必須完全匹配 updateActionButtons 中的 onclick)
         switch (type) {
           // === 0-2 歲 ===
           case "cry":
@@ -6044,12 +5991,12 @@ function finishCharacterCreation() {
             effects = { health: 3, happy: 2 };
             actionName = "😴 睡覺";
             break;
-          case "play_toy": // 修正 ID
+          case "play_toy": // ✅ 修正 ID
             cost = 15;
             effects = { happy: 8 };
             actionName = "🧸 玩玩具";
             break;
-          case "learn_speak": // 修正 ID
+          case "learn_speak": // ✅ 修正 ID
             cost = 25;
             effects = {
               intel: 3 * Game.learnBonus,
@@ -6062,7 +6009,7 @@ function finishCharacterCreation() {
             effects = { health: 2, happy: 5 };
             actionName = "🐛 爬行";
             break;
-          case "watch_mobile": // 修正 ID
+          case "watch_mobile": // ✅ 修正 ID
             cost = 10;
             effects = { happy: 8, intel: -2 };
             actionName = "👀 看手機";
@@ -6083,12 +6030,12 @@ function finishCharacterCreation() {
             effects = { skills: { art: 4 * Game.skillBonus }, happy: 5 };
             actionName = "🖍️ 畫畫";
             break;
-          case "watch_tv": // 修正 ID
+          case "watch_tv": // ✅ 修正 ID
             cost = 10;
             effects = { happy: 10, intel: -1 };
             actionName = "📺 看電視";
             break;
-          case "make_friend": // 修正 ID
+          case "make_friend": // ✅ 修正 ID
             cost = 20;
             effects = {
               skills: { communication: 5 * Game.skillBonus },
@@ -6097,7 +6044,7 @@ function finishCharacterCreation() {
             actionName = "👫 交朋友";
             if (Math.random() < 0.7) addFriend();
             break;
-          case "play_outside": // 修正 ID
+          case "play_outside": // ✅ 修正 ID
             cost = 20;
             effects = {
               health: 5,
@@ -6106,7 +6053,7 @@ function finishCharacterCreation() {
             };
             actionName = "🌳 戶外玩耍";
             break;
-          case "learn_music": // 修正 ID
+          case "learn_music": // ✅ 修正 ID
             if (Game.money < 5000) {
               isProcessing = false;
               return alert("💸 金錢不足！");
@@ -6121,12 +6068,12 @@ function finishCharacterCreation() {
             break;
 
           // === 6-12 歲 ===
-          case "study_hard": // 修正 ID
+          case "study_hard": // ✅ 修正 ID
             cost = 30;
             effects = { intel: 5 * Game.learnBonus, happy: -3 };
             actionName = "📚 認真讀書";
             break;
-          case "cram_school": // 修正 ID
+          case "cram_school": // ✅ 修正 ID
             if (Game.money < 2000) {
               isProcessing = false;
               return alert("💸 金錢不足！");
@@ -6144,12 +6091,12 @@ function finishCharacterCreation() {
             };
             actionName = "⚽ 運動";
             break;
-          case "play_game": // 修正 ID
+          case "play_game": // ✅ 修正 ID
             cost = 15;
             effects = { happy: 12, intel: -2 };
             actionName = "🎮 打電動";
             break;
-          case "help_parent": // 修正 ID
+          case "help_parent": // ✅ 修正 ID
             cost = 20;
             effects = {
               happy: 5,
@@ -6157,7 +6104,7 @@ function finishCharacterCreation() {
             };
             actionName = "🏠 幫忙家務";
             break;
-          case "read_book": // 修正 ID
+          case "read_book": // ✅ 修正 ID
             cost = 25;
             effects = {
               intel: 4 * Game.learnBonus,
@@ -6168,7 +6115,7 @@ function finishCharacterCreation() {
             break;
 
           // === 13-17 歲 ===
-          case "exam_prep": // 修正 ID
+          case "exam_prep": // ✅ 修正 ID
             cost = 35;
             effects = { intel: 10 * Game.learnBonus, happy: -8 };
             actionName = "📝 準備考試";
@@ -6184,7 +6131,7 @@ function finishCharacterCreation() {
             };
             actionName = "🎭 參加社團";
             break;
-          case "date_crush": // 修正 ID
+          case "date_crush": // ✅ 修正 ID
             if (Game.money < 500) {
               isProcessing = false;
               return alert("💸 金錢不足！");
@@ -6202,7 +6149,7 @@ function finishCharacterCreation() {
             effects = { happy: 8, intel: -3 };
             actionName = "😤 叛逆期";
             break;
-          case "part_time": // 修正 ID
+          case "part_time": // ✅ 修正 ID
             cost = 30;
             const salary = Math.floor(10000 + Math.random() * 5000);
             effects = {
@@ -6212,7 +6159,7 @@ function finishCharacterCreation() {
             };
             actionName = "💼 打工";
             break;
-          case "learn_code": // 修正 ID
+          case "learn_code": // ✅ 修正 ID
             cost = 35;
             effects = {
               intel: 5 * Game.learnBonus,
@@ -6241,7 +6188,7 @@ function finishCharacterCreation() {
               actionName = "💼 找工作失敗(無業)";
             }
             break;
-          case "study_skill": // 修正 ID
+          case "study_skill": // ✅ 修正 ID
             if (Game.money < 3000) {
               isProcessing = false;
               return alert("💸 金錢不足！");
@@ -6342,6 +6289,7 @@ function finishCharacterCreation() {
             return alert("❌ 未知操作: " + type);
         }
 
+        // 5. 體力再次檢查 (保險起見)
         if (Game.stamina < cost) {
           isProcessing = false;
           return alert("❌ 體力不足！");
@@ -6350,8 +6298,8 @@ function finishCharacterCreation() {
         Game.stamina -= cost;
         Game.totalActions++;
 
+        // 6. 應用數值效果
         const changes = [];
-        // 應用效果邏輯... (保持原樣)
         Object.keys(effects).forEach((key) => {
           if (key === "skills") {
             Object.keys(effects.skills).forEach((sk) => {
@@ -6366,183 +6314,16 @@ function finishCharacterCreation() {
           }
         });
 
+        // 7. 更新畫面與日誌
         updateUI();
         log(actionName, changes);
         if (changes.length > 0) showChanges(changes);
 
+        // 8. 解除鎖定
         setTimeout(() => {
           isProcessing = false;
         }, 300);
       }
-
-      function nextYear() {
-        // ===== ✅ 新增：防抖检查 =====
-        if (isProcessing) {
-          console.log("⏳ 處理中，請稍候...");
-          return;
-        }
-
-        if (Game.health <= 0) {
-          showEnding();
-          return;
-        }
-
-        isProcessing = true; // ✅ 新增
-
-        // ===== ✅ 新增：记录旧阶段 =====
-        const oldStage = LIFE_STAGES.find(
-          (s) => Game.age >= s.min && Game.age <= s.max,
-        );
-
-        Game.age++;
-        Game.stamina = 100;
-        // 🆕 新增功能調用
-        game.workYears++;
-        game.promotionChecked = false;
-        updateInflation();
-        payMortgage();
-        updateChildren();
-        checkPromotion();
-
-        // 每5年自動存檔
-        if (game.age % 5 === 0) {
-          saveGame();
-        }
-
-        // ===== ✅ 新增：检测新阶段 =====
-        const newStage = LIFE_STAGES.find(
-          (s) => Game.age >= s.min && Game.age <= s.max,
-        );
-
-        // ===== ✅ 新增：生活成本系统 =====
-        let livingCost = 0;
-        if (Game.age >= 18 && Game.age < 25) {
-          livingCost = 15000;
-        } else if (Game.age >= 25 && Game.age < 40) {
-          livingCost = 30000;
-        } else if (Game.age >= 40 && Game.age < 60) {
-          livingCost = 50000;
-        } else if (Game.age >= 60) {
-          livingCost = 70000;
-        }
-
-        const hasHouse = Game.inventory.some((i) => i.startsWith("house"));
-        if (hasHouse) {
-          livingCost = Math.floor(livingCost * 0.6);
-        }
-
-        const hasCar = Game.inventory.some((i) => i.startsWith("car"));
-        if (hasCar) {
-          livingCost += 12000;
-        }
-
-        if (livingCost > 0) {
-          Game.money -= livingCost;
-          log(`💸 年度生活費 -${livingCost.toLocaleString()}`);
-        }
-
-        // ===== ✅ 新增：随机突发事件 =====
-        if (Math.random() < 0.15) {
-          const emergencies = [
-            { name: "📱 手機壞掉", cost: 8000 },
-            { name: "🏥 突發疾病", cost: 15000 },
-            { name: "💻 電腦故障", cost: 12000 },
-            { name: "🚗 車輛維修", cost: 20000 },
-            { name: "👨‍👩‍👧 家人急用", cost: 25000 },
-            { name: "🏠 房屋維修", cost: 30000 },
-          ];
-          const emergency =
-            emergencies[Math.floor(Math.random() * emergencies.length)];
-          Game.money -= emergency.cost;
-          Game.happy -= 5;
-          log(`⚠️ ${emergency.name} -${emergency.cost.toLocaleString()}`);
-        }
-
-        // ===== ✅ 新增：NPC 生老病死系统 =====
-        updateNPCLifecycle();
-
-        const yearChanges = [];
-
-        // 被动收入
-        if (Game.yearlyMoney > 0) {
-          Game.money += Game.yearlyMoney;
-          yearChanges.push(`💰 +${Game.yearlyMoney.toLocaleString()}`);
-        }
-
-        // 房产收入
-        Game.inventory.forEach((item) => {
-          const house = HOUSES.find((h) => h.id === item);
-          if (house && house.passive) {
-            Game.money += house.passive;
-            yearChanges.push(
-              `🏠 ${house.name} +${house.passive.toLocaleString()}`,
-            );
-          }
-        });
-
-        // 自然衰减
-        Game.health -= Math.floor(5 * Game.healthDecay);
-        Game.happy -= Math.floor(3 * Game.happyDecay);
-
-        if (Game.happy > 80) Game.happyYears++;
-
-        // 负债检测
-        if (Game.money < 0) {
-          Game.hasBeenInDebt = true;
-          log("⚠️ 陷入負債！");
-        }
-
-        if (yearChanges.length > 0) {
-          log(`📅 ${Game.age} 歲：${yearChanges.join("、")}`);
-        }
-
-        // ===== ✅ 修改：阶段转换提示（非阻塞）=====
-        if (oldStage && newStage && oldStage.name !== newStage.name) {
-          log(`🎂 進入新階段：${newStage.icon} ${newStage.name}`);
-
-          // 使用非阻塞的 toast 提示
-          const toast = document.createElement("div");
-          toast.style.cssText = `
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--accent), var(--purple));
-            color: white;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-weight: bold;
-            z-index: 400;
-            box-shadow: 0 8px 25px rgba(187, 134, 252, 0.6);
-            animation: slideIn 0.5s;
-            font-size: 1.2em;
-            border: 3px solid white;
-        `;
-          toast.innerHTML = `${newStage.icon} 進入 ${newStage.name}`;
-          document.body.appendChild(toast);
-
-          setTimeout(() => {
-            toast.style.animation = "slideIn 0.5s reverse";
-            setTimeout(() => {
-              if (toast.parentNode) {
-                document.body.removeChild(toast);
-              }
-            }, 500);
-          }, 2000);
-        }
-
-        // 检查成就
-        checkAchievements();
-
-        // 更新UI
-        updateUI();
-        renderChildrenList(); // 🆕 更新子女列表顯示
-        // ===== ✅ 新增：延迟解除防抖 =====
-        setTimeout(() => {
-          isProcessing = false;
-        }, 300);
-      }
-
       // 新增函數
       function triggerOriginEvent() {
         const originEvents = {
