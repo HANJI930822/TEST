@@ -1036,9 +1036,16 @@ function updateUI() {
   }
   lastUpdateTime = now;
   // 基本資訊
-  document.getElementById("player-name").textContent = Game.name;
+  const nameEl = document.getElementById("player-name");
+  nameEl.textContent = Game.name;
+  
+  // ✅ 這行是關鍵！讓 CSS 的 content: attr(data-age) "歲" 能抓到數值
+  nameEl.setAttribute("data-age", Game.age); 
+
+  // 保持舊的 age-display 更新，以免電腦版顯示錯誤
   document.getElementById("age-display").textContent = Game.age;
   document.getElementById("player-origin").textContent = Game.origin;
+
   const jobName = JOBS.find((j) => j.id === Game.jobId)?.name || "無業";
   const jobTitle = Game.job && Game.job !== "無業" ? ` (${Game.job})` : "";
   document.getElementById("player-job").textContent = jobName + jobTitle;

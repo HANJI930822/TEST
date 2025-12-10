@@ -913,17 +913,33 @@ button,
 
   /* 2. 極簡頂部列 (Sticky Header) */
   .header {
-    padding: 8px 15px;
-    background: rgba(20, 20, 30, 0.95); /* 深色磨砂玻璃 */
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    height: 60px; /* 固定高度 */
-    display: flex;
-    align-items: center; /* 垂直居中 */
-  }
+  /* 使用 safe-area-inset-top 避開瀏海 */
+  padding: env(safe-area-inset-top) 15px 10px 15px; 
+  /* 如果瀏覽器不支援 env()，給一個預設的頂部內距 */
+  padding-top: max(20px, env(safe-area-inset-top)); 
+  
+  background: rgba(20, 20, 30, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  /* 改用 auto 高度，讓內容撐開，避免寫死 height 導致溢出 */
+  height: auto; 
+  min-height: 80px; /* 增加最小高度以容納瀏海區域 */
+  
+  display: flex;
+  flex-direction: column; /* 改為垂直排列，因為有了安全區，空間變大了 */
+  justify-content: center;
+}
+
+/* 額外修正：確保 Body 內容不會被變高的 Header 擋住 */
+body {
+  /* 增加頂部內距，數值 = Header 的預估高度 */
+  scroll-padding-top: 100px; 
+}
 
   /* 隱藏非核心資訊 */
   .player-subtitle, 
