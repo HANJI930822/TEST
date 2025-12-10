@@ -4965,24 +4965,30 @@ function nav(page, event) {
     // 显示所有成就（包括未解锁的）
     ACHIEVEMENTS.forEach((ach) => {
       const isUnlocked = Game.unlockedAchievements.includes(ach.id);
+      
+      // ✅ 修改這裡：直接顯示 ach.desc，不再顯示 "???"
+      // 同時調整未解鎖時的文字顏色，讓它看起來暗一點
+      const descText = ach.desc; 
+      const descColor = isUnlocked ? "var(--text-dim)" : "#777"; // 未解鎖時文字較暗
+
       achievementHtml += `
                 <div style="background: ${isUnlocked ? "linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 160, 0, 0.15))" : "rgba(0,0,0,0.3)"};
                             padding: 12px;
                             border-radius: 10px;
                             margin-bottom: 10px;
                             border: 2px solid ${isUnlocked ? "var(--gold)" : "rgba(255,255,255,0.1)"};
-                            ${isUnlocked ? "box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);" : "opacity: 0.6; filter: grayscale(0.8);"}">
+                            ${isUnlocked ? "box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);" : "opacity: 0.8;"}">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="font-size: 2em;">${isUnlocked ? ach.icon : "🔒"}</div>
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: ${isUnlocked ? "var(--gold)" : "var(--text-dim)"}; font-size: 1em;">
+                            <div style="font-weight: bold; color: ${isUnlocked ? "var(--gold)" : "#aaa"}; font-size: 1em;">
                                 ${ach.name}
                             </div>
-                            <div style="color: var(--text-dim); font-size: 0.85em; margin-top: 3px;">
-                                ${isUnlocked ? ach.desc : "???"}
+                            <div style="color: ${descColor}; font-size: 0.85em; margin-top: 3px;">
+                                ${descText}
                             </div>
                         </div>
-                        ${isUnlocked ? '<div style="color: var(--green); font-weight: bold; font-size: 1.2em;">✓</div>' : ""}
+                        ${isUnlocked ? '<div style="color: var(--green); font-weight: bold; font-size: 1.2em;">✓</div>' : ''}
                     </div>
                 </div>
             `;
