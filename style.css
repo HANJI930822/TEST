@@ -1,0 +1,1764 @@
+:root {
+  --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-dark: #0f0f23;
+  --card: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+  --accent: #bb86fc;
+  --accent-glow: rgba(187, 134, 252, 0.3);
+  --text: #ffffff;
+  --text-dim: #b0b0b0;
+  --green: #03dac6;
+  --red: #cf6679;
+  --gold: #ffd700;
+  --blue: #2196f3;
+  --orange: #ff9800;
+  --purple: #9c27b0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "微軟正黑體", "Noto Sans TC", sans-serif;
+  background: var(--bg-dark);
+  color: var(--text);
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: var(--bg-primary);
+  z-index: -1;
+  opacity: 0.3;
+  pointer-events: none; /* 確保不擋住點擊 */
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+  padding: 15px;
+  position: sticky;
+  top: 0;
+  z-index: 100; /* 提高層級 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid var(--accent);
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.player-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.player-details {
+  flex: 1;
+}
+
+.player-name-line {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--gold);
+}
+
+.player-subtitle {
+  font-size: 0.8em;
+  color: var(--text-dim);
+}
+
+.big-stat {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--gold);
+  text-align: center;
+  margin: 10px 0;
+  text-shadow: 0 0 10px var(--gold);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-value {
+  font-size: 1.2em;
+  font-weight: bold;
+  display: block;
+  color: var(--text);
+}
+
+.status-alerts {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.status-alert {
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-align: center;
+  animation: slideIn 0.3s;
+}
+
+.alert-red {
+  background: linear-gradient(135deg, #b00020, #d32f2f);
+  color: #fff;
+}
+.alert-orange {
+  background: linear-gradient(135deg, #ff9800, #fb8c00);
+  color: #fff;
+}
+.alert-blue {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: #fff;
+}
+
+/* ===== SKILLS ===== */
+.skills-container {
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.skill-item {
+  margin-bottom: 8px;
+}
+
+.skill-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  margin-bottom: 3px;
+  color: var(--text);
+}
+
+.skill-bar-bg {
+  background: #333;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  transition: width 0.5s ease;
+}
+
+/* ===== STAMINA ===== */
+.stamina-container {
+  margin-top: 10px;
+}
+
+.stamina-label {
+  font-size: 0.85em;
+  color: var(--blue);
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bg {
+  background: #444;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2196f3, #03dac6);
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(1);
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.6);
+}
+
+.progress-fill.low {
+  background: linear-gradient(90deg, #cf6679, #f44336);
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--card);
+  border-radius: 15px;
+  margin: 15px 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.4s;
+  position: relative; /* 確保層級正確 */
+  z-index: 1;
+}
+
+.card-header {
+  padding: 15px;
+  background: rgba(187, 134, 252, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+.card-body {
+  padding: 15px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== BUTTONS 修復點擊問題 ===== */
+.btn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  position: relative;
+  z-index: 10; /* 確保在最上層 */
+}
+
+button {
+  background: linear-gradient(135deg, #444, #555);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95em;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  z-index: 10; /* 確保可點擊 */
+  pointer-events: auto; /* 強制啟用點擊 */
+}
+
+/* 修復 ::before 偽元素擋住點擊的問題 */
+button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.6s,
+    height 0.6s;
+  pointer-events: none; /* 關鍵：讓偽元素不擋住點擊 */
+  z-index: -1; /* 放到按鈕文字下方 */
+}
+
+button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(187, 134, 252, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(187, 134, 252, 0.3);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1);
+  pointer-events: none; /* disabled 時才禁用點擊 */
+}
+
+.btn-main {
+  background: linear-gradient(135deg, var(--accent), #9c27b0);
+  color: white;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 1.1em;
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.btn-job {
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+.btn-buy {
+  background: linear-gradient(135deg, var(--green), #00897b);
+  color: black;
+  font-weight: bold;
+}
+
+.btn-risk {
+  background: linear-gradient(135deg, var(--red), #c62828);
+}
+
+.cost-tag {
+  font-size: 0.7em;
+  color: #ddd;
+  display: block;
+  margin-top: 3px;
+  pointer-events: none; /* 不擋住按鈕點擊 */
+}
+
+/* ===== ORIGIN SELECTION ===== */
+#scene-creation {
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.creation-title {
+  font-size: 2em;
+  background: var(--bg-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.origin-card {
+  background: linear-gradient(135deg, #2a2a3e, #3a3a4e);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 10; /* 確保可點擊 */
+  pointer-events: auto;
+}
+
+.origin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(187, 134, 252, 0.3);
+  border-color: rgba(187, 134, 252, 0.5);
+}
+
+.origin-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #3a3a5e, #4a4a6e);
+  box-shadow: 0 0 25px var(--accent-glow);
+}
+
+.origin-card.selected::before {
+  content: "✓";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.origin-name {
+  font-weight: bold;
+  color: var(--gold);
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.origin-desc {
+  font-size: 0.9em;
+  color: var(--text-dim);
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+.origin-parents {
+  font-size: 0.85em;
+  color: #888;
+  margin: 5px 0;
+  font-style: italic;
+}
+
+.origin-stats {
+  color: var(--green);
+  font-size: 0.85em;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ===== INPUT GROUPS ===== */
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 1em;
+  font-family: inherit;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 300; /* 最高層級 */
+  display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s;
+}
+
+/* ✅ 修正 Modal 樣式，防止內容溢出 */
+.modal-box {
+  background: var(--card);
+  width: 85%;
+  max-width: 400px;
+  max-height: 80vh; /* 限制最大高度 */
+  display: flex; /* 使用 Flex 佈局 */
+  flex-direction: column;
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.4s;
+  position: relative;
+  z-index: 310;
+}
+
+.modal-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--gold);
+  margin-bottom: 15px;
+}
+
+.modal-desc {
+  margin-bottom: 20px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-y: auto; /* ✅ 允許文字區域滾動 */
+  flex: 1; /* ✅ 自動佔用剩餘空間 */
+  min-height: 50px;
+}
+
+.modal-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 15px;
+  position: relative;
+  z-index: 320;
+}
+
+/* ===== NAV BAR ===== */
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(135deg, #1e1e2e, #000);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  border-top: 2px solid var(--accent);
+  z-index: 200; /* 高層級但低於 modal */
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.nav-item {
+  color: #888;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.75em;
+  padding: 5px;
+  transition: all 0.3s;
+  flex: 1;
+  position: relative;
+  z-index: 210;
+  pointer-events: auto;
+}
+
+.nav-item:hover {
+  color: var(--accent);
+}
+
+.nav-item:active {
+  transform: scale(0.95);
+}
+
+.nav-item.active {
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.nav-icon {
+  display: block;
+  font-size: 1.8em;
+  margin-bottom: 2px;
+}
+
+.page {
+  display: none;
+  animation: fadeIn 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ===== TALENT TAGS ===== */
+.talent-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold), #ffa000);
+  color: black;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 0.75em;
+  margin-right: 5px;
+  margin-top: 3px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(255, 215, 0, 0.3);
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.talent-bad {
+  background: linear-gradient(135deg, var(--red), #c62828);
+  color: white;
+}
+/* ===== 特質懸停效果（簡化版）===== */
+.trait-tooltip {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto !important; /* ✅ 强制允许点击 */
+}
+
+.trait-tooltip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(187, 134, 252, 0.6);
+  filter: brightness(1.2);
+}
+
+.trait-tooltip:active {
+  transform: scale(0.95);
+}
+
+/* ✅ 手機版點擊提示 */
+@media (max-width: 767px) {
+  .modal-box {
+    width: 90%;
+    padding: 12px; /* ✅ 手机版更小 */
+    max-height: 75vh; /* ✅ 限制高度 */
+  }
+
+  .modal-title {
+    font-size: 1.1em; /* ✅ 缩小标题 */
+  }
+
+  .modal-btn {
+    padding: 10px; /* ✅ 缩小按钮 */
+    font-size: 0.9em;
+  }
+}
+
+/* ===== LOG BOX ===== */
+.log-box {
+  height: 150px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1.6;
+}
+
+.log-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log-box::-webkit-scrollbar-track {
+  background: #222;
+}
+
+.log-box::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+/* ===== JOB/ITEM CARD ===== */
+.job-card {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.job-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(5px);
+}
+
+.job-card:active {
+  transform: translateX(3px);
+}
+
+.job-name {
+  font-weight: bold;
+  color: var(--blue);
+  font-size: 1.1em;
+}
+
+.job-salary {
+  color: var(--green);
+  font-size: 0.9em;
+}
+
+.job-requirement {
+  color: var(--text-dim);
+  font-size: 0.8em;
+  margin-top: 3px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.section-title {
+  font-size: 1.2em;
+  color: var(--gold);
+  margin: 20px 10px 10px;
+  text-align: left;
+  font-weight: bold;
+}
+
+/* 遊戲場景預設隱藏 */
+#scene-game {
+  display: none !important; /* ✅ 加上 !important 強制優先 */
+}
+
+/* 遊戲開始後才顯示 */
+#scene-game.active {
+  display: block !important;
+}
+
+/* 確保所有可互動元素都在正確層級 */
+input,
+select,
+button,
+.origin-card,
+.job-card,
+.nav-item {
+  -webkit-tap-highlight-color: rgba(187, 134, 252, 0.3);
+  touch-action: manipulation;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+@keyframes popIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+}
+/* ===== 📱 响应式布局 ===== */
+
+/* 容器包装 */
+#scene-creation,
+#scene-game {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* === 桌面端 (大于 1024px) === */
+@media (min-width: 1025px) {
+  body {
+    max-width: 800px;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .card {
+    margin: 20px 15px;
+  }
+
+  .btn-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .origin-card {
+    padding: 20px;
+  }
+
+  .modal-box {
+    max-width: 600px;
+  }
+}
+
+/* === 平板端 (768px - 1024px) === */
+@media (min-width: 768px) and (max-width: 1024px) {
+  body {
+    max-width: 100%;
+    padding: 0 20px 80px 20px;
+  }
+
+  .header {
+    padding: 15px 20px;
+  }
+
+  .card {
+    margin: 15px 0;
+  }
+
+  .btn-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  button {
+    font-size: 1em;
+    padding: 14px;
+  }
+
+  .nav-bar {
+    padding: 10px 0;
+  }
+
+  .nav-item {
+    font-size: 0.8em;
+  }
+
+  .nav-icon {
+    font-size: 2em;
+  }
+}
+
+/* =========================================
+   📱 手機版深度重構 (Mobile Refactoring)
+   目標：解決擁擠感，增加呼吸感，優化拇指操作
+   ========================================= */
+
+@media (max-width: 767px) {
+
+  /* 1. 全局設定：移除多餘邊距，背景全屏 */
+  body {
+    padding: 0 0 70px 0; /* 底部留白給導航列 */
+    background: #0f0f13; /* 更深邃的背景 */
+    font-size: 14px; /* 基準字體微調 */
+  }
+
+  /* 2. 極簡頂部列 (Sticky Header) */
+  .header {
+    padding: 8px 15px;
+    background: rgba(20, 20, 30, 0.95); /* 深色磨砂玻璃 */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 60px; /* 固定高度 */
+    display: flex;
+    align-items: center; /* 垂直居中 */
+  }
+
+  /* 隱藏非核心資訊 */
+  .player-subtitle, 
+  .skills-container, 
+  .skills-section,
+  .status-alerts {
+    display: none !important; /* 手機版首頁不顯示這些細節 */
+  }
+
+  /* 頂部佈局：頭像左，資產右 */
+  .dashboard-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    gap: 0;
+  }
+
+  /* 左側：頭像與狀態 */
+  .player-info-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .player-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px; /* 圓角方形更現代 */
+    font-size: 1.4em;
+    background: linear-gradient(135deg, #333, #444);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .player-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .player-name-line {
+    font-size: 1.1em;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  
+  /* 用小標籤顯示年齡 */
+  .player-name-line::after {
+    content: attr(data-age) "歲"; /* 需配合 JS 寫入 data-age */
+    font-size: 0.7em;
+    background: var(--accent);
+    color: #000;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* 右側：金錢 (大字體) */
+  .big-stat {
+    font-size: 1.2em;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+  }
+
+  /* 3. 狀態條 (Status Bars) - 移至 Header 下方作為次級導航 */
+  /* 將原本的 .stat-grid 改造成細長的進度條總覽 */
+  .stat-grid {
+    position: fixed;
+    top: 60px; /* 接在 Header 下方 */
+    left: 0;
+    width: 100%;
+    height: 4px; /* 極細 */
+    background: #222;
+    z-index: 900;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+  }
+
+  /* 我們用偽元素來模擬三個狀態條的顏色，這裡需要 JS 配合修改寬度，
+     或者保持簡單：只顯示健康條 */
+  
+  /* 如果不想改 JS，我們將其隱藏，改在「個人檔案」頁顯示詳細 */
+  .stat-grid {
+    display: none !important; 
+  }
+
+  /* 替代方案：在 Header 底部加一條體力條 */
+  .stamina-container {
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    z-index: 1001;
+  }
+  .stamina-label { display: none; } /* 隱藏文字 */
+  .progress-bg {
+    height: 3px;
+    background: transparent;
+    border-radius: 0;
+  }
+  .progress-fill {
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 5px var(--blue);
+  }
+
+  /* 4. 主要內容區 (Content Area) */
+  .page {
+    padding: 15px;
+    animation: slideUp 0.3s ease-out; /* 切換時由下往上滑入 */
+  }
+
+  /* 卡片設計優化 */
+  .card {
+    background: #1a1a24;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    margin: 0 0 20px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: transparent;
+    padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 1.05em;
+    color: var(--text-dim);
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  /* 5. 互動按鈕 (Action Buttons) - 大按鈕，易點擊 */
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 雙列 */
+    gap: 12px;
+  }
+
+  button {
+    height: auto;
+    min-height: 60px; /* 增加高度 */
+    border-radius: 12px;
+    background: #2a2a35;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-shadow: none; /* 扁平化 */
+    position: relative;
+  }
+
+  /* 按鈕按下的效果 */
+  button:active {
+    background: #333;
+    transform: scale(0.96);
+  }
+
+  /* 按鈕內文字 */
+  button span:first-child {
+    font-size: 1.05em;
+    margin-bottom: 2px;
+    color: #eee;
+  }
+  
+  /* 消耗/成本標籤 */
+  .cost-tag {
+    font-size: 0.75em;
+    color: #888;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+  }
+
+  /* 特殊按鈕顏色 */
+  .btn-risk { background: rgba(207, 102, 121, 0.15); border-color: rgba(207, 102, 121, 0.3); }
+  .btn-buy { background: rgba(3, 218, 198, 0.15); border-color: rgba(3, 218, 198, 0.3); }
+
+  /* 6. 事件日誌 (Log) - 改為底部浮層或簡化 */
+  .log-box {
+    height: auto;
+    max-height: 120px; /* 限制高度 */
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-top: 10px;
+    mask-image: linear-gradient(to bottom, transparent, black 20%); /* 頂部漸層淡入 */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%);
+  }
+  
+  /* 讓最新一條日誌特別顯眼 */
+  .log-box div:last-child {
+    background: rgba(187, 134, 252, 0.1);
+    border-left: 3px solid var(--accent);
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 0 8px 8px 0;
+    animation: pulse 1s;
+  }
+
+  /* 7. 底部導航列 (Bottom Nav) - iOS 風格 */
+  .nav-bar {
+    height: 65px; /* 稍微加高 */
+    background: #14141f; /* 純色背景 */
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+  }
+
+  .nav-item {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+    gap: 4px;
+    position: relative;
+  }
+
+  .nav-item.active {
+    color: var(--accent);
+  }
+  
+  /* 活躍狀態的小光點 */
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    width: 4px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .nav-icon {
+    font-size: 1.4em;
+    margin: 0;
+  }
+
+  /* 8. 模態視窗 (Modal) - 底部半屏彈窗 (Bottom Sheet) 風格 */
+  .modal-overlay {
+    align-items: flex-end; /* 改為從底部彈出 */
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0; /* 只有上面圓角 */
+    padding: 25px 20px 40px 20px; /* 底部多留白 */
+    margin: 0;
+    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    background: #1e1e2c;
+  }
+  
+  /* 彈窗頂部的小把手 (Handle) */
+  .modal-box::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+  }
+
+  /* 特質卡片在手機上的特別調整 */
+  .trait-card-container {
+    height: 70vh; /* 固定高度 */
+  }
+}
+
+/* 額外動畫定義 */
+@keyframes slideUpModal {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+
+/* === 极小屏幕 (小于 375px) === */
+@media (max-width: 374px) {
+  .player-name-line {
+    font-size: 0.9em;
+  }
+
+  .stat-grid {
+    font-size: 0.75em;
+  }
+
+  .btn-grid {
+    gap: 6px;
+  }
+
+  button {
+    padding: 8px;
+    font-size: 0.8em;
+  }
+
+  .nav-item {
+    font-size: 0.65em;
+  }
+
+  .nav-icon {
+    font-size: 1.4em;
+  }
+
+  .card {
+    margin: 10px 0;
+  }
+
+  .talent-tag {
+    font-size: 0.65em;
+    padding: 2px 5px;
+  }
+}
+
+/* === 横屏模式优化 === */
+@media (max-height: 600px) and (orientation: landscape) {
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .log-box {
+    height: 100px;
+  }
+
+  .modal-box {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .card {
+    margin: 10px 0;
+  }
+}
+
+/* === 触控优化 === */
+@media (hover: none) and (pointer: coarse) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .nav-item {
+    min-height: 48px;
+  }
+
+  .origin-card {
+    min-height: 60px;
+  }
+
+  .job-card {
+    min-height: 60px;
+  }
+}
+
+/* === 导航栏响应式 === */
+.nav-bar {
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .nav-bar {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 1025px) {
+  .nav-bar {
+    max-width: 800px;
+  }
+}
+
+/* === 出身选择响应式 === */
+@media (max-width: 767px) {
+  /* 出身选择的左右箭头 */
+  button[onclick="prevOrigin()"],
+  button[onclick="nextOrigin()"] {
+    width: 45px !important;
+    height: 45px !important;
+    font-size: 1.5em !important;
+    left: 5px !important;
+  }
+
+  button[onclick="nextOrigin()"] {
+    right: 5px !important;
+    left: auto !important;
+  }
+
+  /* 出身卡片内边距 */
+  div[style*="padding: 0 80px"] {
+    padding: 0 55px !important;
+  }
+}
+
+/* === 特质选择响应式 === */
+@media (max-width: 767px) {
+  #trait-options .origin-card {
+    max-width: 100% !important;
+    margin: 10px 0 !important;
+  }
+}
+
+/* === 职业选择响应式 === */
+@media (max-width: 767px) {
+  button[onclick="prevJob()"],
+  button[onclick="nextJob()"] {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.2em !important;
+    left: -5px !important;
+  }
+
+  button[onclick="nextJob()"] {
+    right: -5px !important;
+    left: auto !important;
+  }
+}
+
+/* === 数值变化提示响应式 === */
+@media (max-width: 767px) {
+  div[style*="position: fixed"][style*="top: 20%"] {
+    top: 15% !important;
+    min-width: 220px !important;
+    padding: 20px 25px !important;
+  }
+}
+/* ===== 🎨 特質選擇介面 (桌面 + 手機 完美版) ===== */
+
+/* 1. 外層容器：限制寬度，讓桌面版不要太寬 */
+#trait-card-container {
+  max-width: 500px; /* 桌面版卡片寬度上限 */
+  margin: 0 auto; /* 居中 */
+  position: relative;
+}
+
+/* 2. 已選特質列表 */
+#selected-traits-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* 3. 卡片包裝層 */
+.trait-card-wrapper {
+  position: relative;
+  min-height: 420px; /* 固定高度，防止切換時內容跳動 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 4. 桌面版導航箭頭 (圓形按鈕) */
+.trait-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.5em;
+  background: rgba(60, 60, 80, 0.8); /* 半透明背景 */
+  z-index: 100;
+  border: 2px solid var(--text-dim);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+}
+
+/* 桌面版箭頭位置：推到卡片外面 */
+.trait-nav-prev {
+  left: -70px;
+}
+.trait-nav-next {
+  right: -70px;
+}
+
+.trait-nav-btn:hover {
+  background: var(--accent);
+  border-color: white;
+  transform: translateY(-50%) scale(1.1); /* 懸停放大 */
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* 5. 卡片本體 */
+.trait-card-body {
+  padding: 30px;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--card);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  overflow: hidden; /* 防止光暈溢出 */
+}
+
+.trait-card-body:hover {
+  transform: translateY(-5px); /* 懸停上浮 */
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 選中狀態 */
+.trait-card-body.selected {
+  border-color: var(--green);
+  box-shadow: 0 0 25px rgba(3, 218, 198, 0.3);
+  background: linear-gradient(145deg, #1e3a3a, #1a1a2e) !important;
+}
+
+/* 桌面版隱藏底部手機導航 */
+.mobile-nav-container {
+  display: none;
+}
+
+/* ===== 📱 手機版響應式調整 (小於 768px) ===== */
+@media (max-width: 768px) {
+  /* 隱藏兩側大箭頭，改用底部按鈕 */
+  .trait-nav-btn {
+    display: none;
+  }
+
+  /* 顯示底部導航 */
+  .mobile-nav-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 1em;
+    active: scale(0.95);
+  }
+
+  /* 調整卡片內距，爭取空間 */
+  .trait-card-body {
+    padding: 20px 15px;
+    min-height: 380px;
+  }
+
+  /* 字體微調 */
+  .trait-name-text {
+    font-size: 1.6em !important;
+  }
+  .trait-desc-text {
+    font-size: 1em !important;
+  }
+}
+/* ===== 🛠️ 修復排版問題專用 CSS (電腦+手機完美版) ===== */
+
+/* 1. 模態視窗容器 - 電腦版優化 */
+/* 當 Modal 進入「純淨模式」時，移除預設的內距和邊框，並設定電腦版的最大寬度 */
+.modal-box.clean-modal {
+  padding: 0 !important;
+  background: transparent !important; /* 背景透明，讓內部的卡片自己決定顏色 */
+  border: none !important;
+  box-shadow: none !important;
+  max-height: 85vh; /* 限制最大高度 */
+  width: 100%; /* 寬度佔滿 */
+  max-width: 450px; /* 限制電腦版最大寬度，使其看起來像一張精緻的卡片 */
+  overflow: hidden; /* 隱藏容器的滾動條 */
+  display: flex; /* 使用 Flex 讓內部卡片置中 */
+  justify-content: center;
+  margin: auto; /* 在螢幕上居中 */
+}
+
+/* 2. 卡片外觀設定 (確保卡片本身有背景和圓角) */
+/* 這是包住標題、內容、按鈕的整個卡片 */
+.trait-card-container {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1e1e2e; /* 統一的深色背景 */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh; /* 限制卡片自身高度 */
+  width: 100%; /* 佔滿容器寬度 */
+}
+
+/* 3. 內容滾動區 (只讓中間的文字區域滾動) */
+.trait-card-scroll {
+  overflow-y: auto; /* 內容過多時才顯示滾動條 */
+  flex-grow: 1; /* 佔據剩餘空間 */
+  padding: 25px; /* 增加內距，讓內容不擁擠 */
+
+  /* 自定義滾動條樣式 (讓它變細、變好看) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* 針對 Chrome/Safari 的滾動條樣式 */
+.trait-card-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.trait-card-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.trait-card-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* 4. 底部按鈕區 (固定在底部) */
+.trait-card-footer {
+  padding: 15px 20px; /* 調整內距 */
+  background: #1e1e2e; /* 與卡片背景一致 */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0; /* 防止被壓縮 */
+}
+
+/* 📱 手機版特別調整 (確保在小螢幕上也能滿版顯示) */
+@media (max-width: 768px) {
+  .modal-box.clean-modal {
+    width: 92%; /* 手機版寬度稍微窄一點 */
+    max-height: 90vh; /* 高度可以更高 */
+  }
+
+  .trait-card-scroll {
+    padding: 20px; /* 手機版內距稍小 */
+  }
+}
+/* ===== ✅ 【新增】技能標籤化樣式 (簡潔版) ===== */
+.skill-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  font-size: 0.75em;
+  color: #ddd;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.skill-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.skill-val {
+  color: var(--gold);
+  font-weight: bold;
+  margin-left: 3px;
+}
+/* ===== 🖥️ 儀表板左右佈局優化 ===== */
+
+/* 1. 外層容器：Flex 橫向排列 */
+.dashboard-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* 2. 左側：玩家資訊 */
+.player-info-section {
+  flex: 1; /* 佔用左側空間 */
+  min-width: 200px;
+}
+
+.player-base {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3. 右側：技能區塊 */
+.skills-section {
+  flex: 1.2; /* 右側稍微寬一點 */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 靠右對齊 */
+}
+
+/* 技能網格佈局 */
+.skills-grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end; /* 靠右排列 */
+}
+
+/* 4. 技能標籤樣式微調 */
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  font-size: 0.8em;
+  color: #ccc;
+  transition: all 0.2s;
+}
+
+.skill-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.skill-val {
+  color: var(--gold);
+  font-weight: bold;
+  margin-left: 6px;
+  font-size: 1.1em;
+}
+
+/* ===== 📱 手機版響應式 (螢幕變窄時自動變回上下排列) ===== */
+@media (max-width: 767px) {
+  .dashboard-wrapper {
+    flex-direction: column; /* 改為垂直排列 */
+    gap: 15px;
+  }
+
+  .skills-section {
+    width: 100%;
+    align-items: flex-start; /* 手機版靠左對齊 */
+  }
+
+  .section-label {
+    text-align: left !important;
+  }
+
+  .skills-grid-layout {
+    justify-content: flex-start; /* 手機版靠左排列 */
+  }
+}
+/* 地圖九宮格樣式 */
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.map-cell {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 5px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 85px;
+  position: relative;
+}
+
+.map-cell:active {
+  transform: scale(0.95);
+}
+
+/* 當前位置的高亮樣式 */
+.map-cell.current {
+  border-color: var(--green);
+  background: rgba(3, 218, 198, 0.15);
+  box-shadow: 0 0 15px rgba(3, 218, 198, 0.3);
+}
+
+.map-cell.current::after {
+  content: "📍";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 1.2em;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.map-icon {
+  font-size: 2.2em;
+  margin-bottom: 5px;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+}
+
+.map-name {
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #ddd;
+}
