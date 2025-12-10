@@ -4,11 +4,11 @@ let currentJobIndex = 0; // 當前顯示的職業索引
 let isProcessing = false; // 防止重复点击
 let lastUpdateTime = 0;
 let allocationState = {
-    points: 50,
-    intel: 0,
-    charm: 0,
-    health: 0,
-    money: 0
+  points: 20,
+  intel: 0,
+  charm: 0,
+  health: 0,
+  money: 0,
 };
 const UPDATE_THROTTLE = 50; // UI更新节流
 
@@ -141,7 +141,7 @@ function renderOriginCard() {
 
   const o = ORIGINS[currentOriginIndex];
   const topUnlocked = isTopOriginUnlocked();
-  const isTopOrigin = !!o.special;        // 有 special 的都視為頂級出身
+  const isTopOrigin = !!o.special; // 有 special 的都視為頂級出身
   const locked = isTopOrigin && !topUnlocked;
 
   // 如果是鎖住的頂級出身，加一段提示文字
@@ -231,70 +231,167 @@ function renderOriginCard() {
   }
 }
 
-
 function selectOrigin(originId) {
-    selectedOrigin = ORIGINS.find(o => o.id === originId);
-    
-    // 隱藏出身選擇畫面
-    document.getElementById("origin-selection").style.display = "none";
-    
-    // 初始化分配狀態 (重置)
-    allocationState = {
-        points: 50,
-        intel: 0,
-        charm: 0,
-        health: 0,
-        money: 0
-    };
-    updateAllocationUI();
-    
-    // 顯示屬性分配畫面
-    document.getElementById("stats-allocation-screen").style.display = "flex"; // 或 block
+  selectedOrigin = ORIGINS.find((o) => o.id === originId);
+
+  // 隱藏出身選擇畫面
+  document.getElementById("origin-selection").style.display = "none";
+
+  // 初始化分配狀態 (重置)
+  allocationState = {
+    points: 50,
+    intel: 0,
+    charm: 0,
+    health: 0,
+    money: 0,
+  };
+  updateAllocationUI();
+
+  // 顯示屬性分配畫面
+  document.getElementById("stats-allocation-screen").style.display = "flex"; // 或 block
 }
 // 更新分配介面 UI
 function updateAllocationUI() {
-    document.getElementById("free-points").textContent = allocationState.points;
-    document.getElementById("alloc-intel").textContent = allocationState.intel;
-    document.getElementById("alloc-charm").textContent = allocationState.charm;
-    document.getElementById("alloc-health").textContent = allocationState.health;
-    document.getElementById("alloc-money").textContent = allocationState.money;
+  document.getElementById("free-points").textContent = allocationState.points;
+  document.getElementById("alloc-intel").textContent = allocationState.intel;
+  document.getElementById("alloc-charm").textContent = allocationState.charm;
+  document.getElementById("alloc-health").textContent = allocationState.health;
+  document.getElementById("alloc-money").textContent = allocationState.money;
 
-    // 禁用/啟用按鈕
-    document.querySelectorAll(".btn-plus").forEach(btn => {
-        btn.disabled = allocationState.points <= 0;
-    });
-    
-    // 負值檢查 (雖然設計上不會有負值，但可防呆)
-    document.querySelectorAll(".btn-minus").forEach(btn => {
-        const type = btn.parentElement.dataset.stat;
-        btn.disabled = allocationState[type] <= 0;
-    });
+  // 禁用/啟用按鈕
+  document.querySelectorAll(".btn-plus").forEach((btn) => {
+    btn.disabled = allocationState.points <= 0;
+  });
+
+  // 負值檢查 (雖然設計上不會有負值，但可防呆)
+  document.querySelectorAll(".btn-minus").forEach((btn) => {
+    const type = btn.parentElement.dataset.stat;
+    btn.disabled = allocationState[type] <= 0;
+  });
 }
 
 // 調整點數
 function adjustStat(type, change) {
-    if (change > 0 && allocationState.points > 0) {
-        allocationState[type]++;
-        allocationState.points--;
-    } else if (change < 0 && allocationState[type] > 0) {
-        allocationState[type]--;
-        allocationState.points++;
-    }
-    updateAllocationUI();
+  if (change > 0 && allocationState.points > 0) {
+    allocationState[type]++;
+    allocationState.points--;
+  } else if (change < 0 && allocationState[type] > 0) {
+    allocationState[type]--;
+    allocationState.points++;
+  }
+  updateAllocationUI();
 }
 
-// 確認分配並開始遊戲 (這是新的進入點)
+// game.js - 修正後的 confirmAllocation
 function confirmAllocation() {
+    // 1. 檢查點數是否分配完 (可選)
     if (allocationState.points > 0) {
         if (!confirm(`你還有 ${allocationState.points} 點未分配，確定要開始嗎？`)) {
             return;
         }
     }
     
-    document.getElementById("stats-allocation-screen").style.display = "none";
-    startGame();
-}
+    // 2. 取得出身資料
+    const origin = ORIGINS.find((o) => o.id === Game.originId);
 
+    // 3. 【核心】計算最終屬性 (出身基礎 + 分配點數)
+    // 注意：1點金錢 = $2000
+    Game.money = origin.money + (allocationState.money * 2000);
+    Game.intel = origin.intel + allocationState.intel;
+    Game.health = (origin.health || 50) + allocationState.health; // 基礎健康給個預設值，例如50
+    Game.happy = origin.happy; 
+    
+    // 初始化技能物件，並加上魅力 (出身魅力 + 分配魅力)
+    Game.skills = {
+        programming: 0, art: 0, medical: 0, cooking: 0, finance: 0,
+        communication: 0, leadership: 0, management: 0,
+        charm: (origin.skills?.charm || 0) + allocationState.charm
+    };
+
+    // 其他基礎初始化
+    Game.yearlyMoney = origin.yearlyMoney;
+    Game.stamina = 100;
+    Game.maxStamina = 100;
+    Game.jobId = "none";
+    Game.job = "無業";
+    Game.unlockedAchievements = loadAchievements();
+    Game.relationships = [];
+    Game.inventory = [];
+    Game.children = [];
+    Game.debtYears = 0;
+    
+    // 4. 載入 NPC (從 data.js 的設定)
+    if (origin.initNPCs && origin.initNPCs.length > 0) {
+        Game.npcs = origin.initNPCs.map(npc => ({
+            ...npc,
+            health: npc.health || 100,
+            isSick: false,
+            age: npc.age || 40,
+            relation: npc.relation || 50
+        }));
+    } else {
+        Game.npcs = [];
+    }
+
+    // 5. 應用出身特殊 Buff (把原本 startGame 後半段的邏輯搬來這裡)
+    if (origin.id === "military") Game.health += 20;
+    if (origin.id === "doctor") Game.skills.medical += 30;
+    if (origin.id === "farmer") { Game.health += 15; Game.happy += 5; }
+    if (origin.id === "fisher") Game.health += 10;
+    if (origin.id === "aboriginal") { Game.skills.charm += 15; Game.skills.art += 20; Game.happy += 10; }
+    if (origin.id === "immigrant") Game.skills.communication += 20;
+    if (origin.id === "tech") Game.skills.programming += 30;
+    if (origin.id === "artist") { Game.skills.art += 40; Game.skills.charm += 10; }
+    if (origin.id === "politician") Game.skills.communication += 25;
+    if (origin.id === "temple") { Game.skills.communication += 15; Game.happy += 5; }
+    if (origin.id === "mafia") { Game.skills.charm += 20; Game.health += 15; }
+    if (origin.id === "star") Game.skills.charm += 30;
+    if (origin.id === "royal") Game.skills.charm += 30;
+    if (origin.id === "hacker") Game.skills.programming += 50;
+    if (origin.id === "monk") { Game.health += 25; Game.happy += 10; }
+    if (origin.id === "cheffamily" || origin.id === "chef_family") { Game.skills.cooking += 60; Game.skills.art += 20; }
+    if (origin.id === "fashion") { Game.skills.charm += 35; Game.skills.art += 25; }
+    if (origin.id === "scientistfamily") { Game.intel += 80; } // 補上
+
+    // 6. 應用天賦效果 (Talents)
+    Game.talents.forEach((t) => t.effect(Game));
+
+    // 7. 檢查負債標記
+    if (Game.money < 0) Game.hasBeenInDebt = true;
+
+    // 8. 生成第一回合動作
+    generateTurnActions();
+
+    // 9. 隱藏分配畫面，進入特質選擇
+    document.getElementById("stats-allocation-screen").style.display = "none";
+    
+    // 初始化特質選擇流程
+    currentTraitStep = 0; // 確保全域變數重置
+    selectedTraits = [];
+    showTraitSelection();
+}
+function showTraitSelection() {
+    // 1. 隱藏分配點數畫面
+    document.getElementById("stats-allocation-screen").style.display = "none";
+    
+    // 2. 顯示特質選擇畫面 (這是剛剛在 HTML 補上的 ID)
+    document.getElementById("trait-selection-screen").style.display = "flex";
+
+    // 3. 初始化特質數據
+    // 防呆：確保 TRAITS 存在
+    if (typeof TRAITS === 'undefined') {
+        console.error("TRAITS 資料未定義，請檢查 data.js");
+        return;
+    }
+
+    availableTraits = [...TRAITS]; // 從 data.js 載入所有特質
+    selectedTraits = []; // 清空已選
+    currentTraitIndex = 0; // 重置索引
+
+    // 4. 渲染介面
+    renderTraitCard();
+    updateSelectedTraitsDisplay();
+}
 function prevOrigin() {
   currentOriginIndex--;
   if (currentOriginIndex < 0) {
@@ -413,6 +510,12 @@ function startGame() {
   const origin = ORIGINS.find((o) => o.id === selectedOriginId);
   const gender = document.getElementById("inp-gender").value;
 
+  Game.name = name;
+  Game.origin = origin.name;
+  Game.originId = origin.id;
+  Game.gender = gender;
+  Game.age = 0; // 確保年齡歸零
+
   // 1. 隨機天賦 (保持不變)
   let talentPool = [...TALENTS];
   let selectedTalents = [];
@@ -422,166 +525,21 @@ function startGame() {
     selectedTalents.push(talentPool[idx]);
     talentPool.splice(idx, 1);
   }
-  
+
   const savedAchievements = loadAchievements();
   console.log("📂 載入已保存的成就:", savedAchievements);
 
-  // 2. 初始化遊戲狀態 (原本的 relationships 已棄用)
-  Game = {
-    ...Game,
-    name,
-    origin: origin.name,
-    originId: origin.id,
-    gender,
-    money: origin.money,
-    intel: origin.intel,
-    happy: origin.happy,
-    yearlyMoney: origin.yearlyMoney,
-    talents: selectedTalents,
-    age: 0,
-     money: origin.money + (allocationState.money * 2000), 
-      intel: origin.intel + allocationState.intel,
-      happy: origin.happy, 
-       health: 50 + allocationState.health, 
-    // ✅ 這裡統一清空，資料將由下方的 initNPCs 載入
-    npcs: [], 
-    relationships: [], 
-    unlockedAchievements: savedAchievements,
-    skills: {
-        ...Game.skills, // 保持預設歸零
-        charm: allocationState.charm // 載入分配的魅力
-    }
+  allocationState = {
+    points: 20, // 確保點數為 20
+    intel: 0,
+    charm: 0,
+    health: 0,
+    money: 0,
   };
-
-  // 3. 記錄是否負債過
-  if (Game.money < 0) Game.hasBeenInDebt = true;
-
-  // 4. ✅【核心修改】讀取 data.js 設定的 NPC，自動載入！
-  // 這一小段程式碼取代了原本幾十行的 switch/case 判斷
-  if (origin.initNPCs && origin.initNPCs.length > 0) {
-      Game.npcs = origin.initNPCs.map(npc => ({
-          ...npc,
-          // 補上動態屬性，避免 data.js 寫得太累贅
-          health: npc.health || 100,
-          isSick: false,
-          age: npc.age || 40, // 若沒寫年齡則給預設值
-          relation: npc.relation || 50
-      }));
-  }
-
-  // 5. 應用出身特殊數值效果 (Buff)
-  // 這部分若 data.js 沒寫在 initNPCs 裡，則保留在此
-  if (origin.id === "military") Game.health += 20;
-  if (origin.id === "doctor") Game.skills.medical += 30;
-  if (origin.id === "farmer") {
-    Game.health += 15;
-    Game.happy += 5;
-  }
-  if (origin.id === "fisher") Game.health += 10;
-  if (origin.id === "aboriginal") {
-    Game.skills.charm += 15;
-    Game.skills.art += 20;
-    Game.happy += 10;
-  }
-  if (origin.id === "immigrant") Game.skills.communication += 20;
-  if (origin.id === "tech") Game.skills.programming += 30;
-  if (origin.id === "artist") {
-    Game.skills.art += 40;
-    Game.skills.charm += 10;
-  }
-  if (origin.id === "politician") Game.skills.communication += 25;
-  if (origin.id === "temple") {
-    Game.skills.communication += 15;
-    Game.happy += 5;
-  }
-  if (origin.id === "mafia") {
-    Game.skills.charm += 20;
-    Game.health += 15;
-  }
-  if (origin.id === "star") Game.skills.charm += 30;
-  if (origin.id === "royal") Game.skills.charm += 30;
-  if (origin.id === "hacker") Game.skills.programming += 50;
-  if (origin.id === "monk") {
-    Game.health += 25;
-    Game.happy += 10;
-  }
-  if (origin.id === "chef_family") { // 注意 data.js 裡的 id 是 cheffamily 還是 chef_family，需一致
-     Game.skills.cooking += 60;
-     Game.skills.art += 20;
-  }
-  if (origin.id === "fashion") {
-      Game.skills.charm += 35;
-      Game.skills.art += 25;
-  }
-
-  // 6. 應用天賦效果
-  Game.talents.forEach((t) => t.effect(Game));
-  
-  generateTurnActions();
-  
-  // 7. 開始特質選擇流程
-  currentTraitStep = 0;
-  selectedTraits = [];
-  showTraitSelection();
-}
-
-// ✅ 新增特質選擇函數
-function showTraitSelection() {
+  updateAllocationUI();
+  //切換畫面：隱藏創角 -> 顯示分配
   document.getElementById("scene-creation").style.display = "none";
-
-  // 初始化可選特質（只有 unlock: 'default' 的）
-  availableTraits = TRAITS.filter((t) => t.unlock === "default");
-  currentTraitIndex = 0;
-  selectedTraits = [];
-
-  let selectionHtml = `
-        <div style="padding: 20px; text-align: center; max-width: 600px; margin: 0 auto;">
-            <h1 style="font-size: 2em; color: var(--gold); margin-bottom: 10px;">✨ 選擇個人特質</h1>
-            <p style="color: var(--text-dim); margin-bottom: 20px;">請選擇 3 個特質來定義你的人生</p>
-            
-            <!-- 已選特質顯示 -->
-            <div id="selected-traits-display" style="margin-bottom: 20px; min-height: 50px;">
-                <p style="color: var(--text-dim); font-size: 0.9em;">已選擇：<span id="selected-count">0</span>/3</p>
-                <div id="selected-traits-list" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px;"></div>
-            </div>
-            
-            <!-- 特質選擇卡片 -->
-            <div id="trait-card-container"></div>
-            
-            <!-- 完成按鈕 -->
-            <button class="btn-main" id="finish-trait-btn" onclick="finishTraitSelection()" disabled style="margin-top: 20px; opacity: 0.5;">
-                開始遊戲
-            </button>
-        </div>
-    `;
-
-  document.getElementById("scene-creation").innerHTML = selectionHtml;
-  document.getElementById("scene-creation").style.display = "block";
-
-  renderTraitCard();
-}
-
-function renderTraitOptions() {
-  let html = "";
-
-  traitChoices.forEach((trait, index) => {
-    html += `
-            <div class="origin-card" onclick="selectTrait(${index})" 
-                 style="margin: 15px auto; max-width: 500px; cursor: pointer;">
-                <div class="origin-name" style="font-size: 1.5em; margin-bottom: 10px;">
-                    ${trait.name}
-                </div>
-                <div class="origin-desc" style="font-size: 1em; line-height: 1.5; color: var(--text-dim);">
-                    ${trait.desc}
-                </div>
-                <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.9em; color: var(--green);">
-                    類型：${trait.category === "personality" ? "性格特質" : "能力特質"}
-                </div>
-            </div>
-        `;
-  });
-
-  document.getElementById("trait-options").innerHTML = html;
+  document.getElementById("stats-allocation-screen").style.display = "flex";
 }
 // ===== ✅ 新增特質卡片渲染函數 =====
 function renderTraitCard() {
@@ -797,6 +755,7 @@ function finishCharacterCreation() {
 
   // 4. 切換介面：隱藏創角，顯示遊戲主畫面
   document.getElementById("scene-creation").style.display = "none";
+  document.getElementById("trait-selection-screen").style.display = "none";
   const gameScene = document.getElementById("scene-game");
   gameScene.style.display = "block";
   gameScene.classList.add("active");
@@ -1152,9 +1111,9 @@ function updateUI() {
   // 基本資訊
   const nameEl = document.getElementById("player-name");
   nameEl.textContent = Game.name;
-  
+
   // ✅ 這行是關鍵！讓 CSS 的 content: attr(data-age) "歲" 能抓到數值
-  nameEl.setAttribute("data-age", Game.age); 
+  nameEl.setAttribute("data-age", Game.age);
 
   // 保持舊的 age-display 更新，以免電腦版顯示錯誤
   document.getElementById("age-display").textContent = Game.age;
@@ -1700,14 +1659,14 @@ function triggerOriginEvent() {
           {
             txt: "正面對決",
             effect: (g) => {
-              if (Math.random() > 0.4) {
-                g.money += 2000000;
+              if (Math.random() > 0.8) {
+                g.money += 20000;
                 g.health -= 20;
                 g.skills.charm += 20;
-                return "大獲全勝！搶地盤賺200萬";
+                return "大獲全勝！搶地盤賺2萬";
               } else {
-                g.health -= 50;
-                g.money -= 500000;
+                g.health -= 20;
+                g.money -= 5000;
                 return "重傷住院，損失慘重";
               }
             },
@@ -1715,8 +1674,8 @@ function triggerOriginEvent() {
           {
             txt: "談判和解",
             effect: (g) => {
-              g.money -= 300000;
-              g.skills.communication += 15;
+              g.money -= 3000;
+              g.skills.communication += 5;
               return "花錢消災，磨練口才";
             },
           },
@@ -1726,8 +1685,8 @@ function triggerOriginEvent() {
         title: "📦 神秘貨物",
         desc: "叔叔讓你幫忙運送一批「海鮮」。",
         effect: (g) => {
-          g.money += 100000;
-          g.happy -= 5;
+          g.money += 10000;
+          g.happy -= 15;
           return "賺了10萬跑路費，但心裡毛毛的";
         },
       },
@@ -1748,7 +1707,7 @@ function triggerOriginEvent() {
           {
             txt: "動用網軍",
             effect: (g) => {
-              g.money -= 200000;
+              g.money -= 20000;
               g.luckBonus -= 0.1;
               return "雖然壓下新聞，但有損陰德";
             },
@@ -1764,20 +1723,20 @@ function triggerOriginEvent() {
           {
             txt: "通報銀行",
             effect: (g) => {
-              g.money += 500000;
-              g.happy += 10;
-              return "獲得白帽駭客獎金50萬";
+              g.money += 50000;
+              g.happy += 5;
+              return "獲得白帽駭客獎金5萬";
             },
           },
           {
             txt: "盜取資金",
             effect: (g) => {
               if (Math.random() > 0.3) {
-                g.money += 10000000;
-                return "神不知鬼不覺轉走1000萬！";
+                g.money += 100000;
+                return "神不知鬼不覺轉走10萬！";
               } else {
                 g.money = 0;
-                g.happy -= 50;
+                g.happy -= 35;
                 return "被抓包！資產凍結！";
               }
             },
@@ -1793,15 +1752,15 @@ function triggerOriginEvent() {
           {
             txt: "為了國家接受",
             effect: (g) => {
-              g.money += 10000000;
-              g.happy -= 30;
+              g.money += 1000000;
+              g.happy -= 60;
               return "獲得巨額嫁妝，但失去了自由";
             },
           },
           {
             txt: "追求真愛拒絕",
             effect: (g) => {
-              g.happy += 20;
+              g.happy += 10;
               g.yearlyMoney /= 2;
               return "被削減皇室津貼，但心靈自由";
             },
@@ -1817,9 +1776,9 @@ function triggerOriginEvent() {
           {
             txt: "親自主持",
             effect: (g) => {
-              g.money += 100000;
-              g.stamina -= 30;
-              return "富商康復，捐贈10萬香油錢";
+              g.money += 10000;
+              g.stamina -= 25;
+              return "富商康復，捐贈1萬香油錢";
             },
           },
           {
@@ -1975,6 +1934,356 @@ function triggerOriginEvent() {
         ],
       },
     ],
+    rich: [
+      {
+        title: "🏢 家族企業危機",
+        desc: "父親公司遭惡意收購，需要緊急資金援助",
+        choices: [
+          {
+            txt: "投資500萬救公司",
+            effect: (g) => {
+              if (g.money >= 5000000) {
+                g.money -= 5000000;
+                g.money += 10000000;
+                return "成功拯救企業，公司價值翻倍！賺回1000萬";
+              }
+              return "資金不足，無法投資";
+            },
+          },
+          {
+            txt: "袖手旁觀",
+            effect: (g) => {
+              g.yearlyMoney = 0;
+              g.happy -= 20;
+              return "家族企業倒閉，失去零用錢來源";
+            },
+          },
+        ],
+      },
+      {
+        title: "💎 繼承遺產",
+        desc: "遠房親戚突然過世，留下一筆遺產給你",
+        effect: (g) => {
+          g.money += 3000000;
+          g.happy += 10;
+          return "獲得300萬遺產";
+        },
+      },
+    ],
+    genius: [
+      {
+        title: "🎓 獎學金機會",
+        desc: "頂尖大學因你優異成績提供全額獎學金",
+        effect: (g) => {
+          g.intel += 20;
+          g.money += 500000;
+          return "智力+20，獲得50萬獎學金";
+        },
+      },
+      {
+        title: "🔬 研究突破",
+        desc: "你的研究獲得重大突破",
+        effect: (g) => {
+          g.intel += 15;
+          g.money += 200000;
+          g.happy += 15;
+          return "學術聲譽大增";
+        },
+      },
+    ],
+    mafia: [
+      {
+        title: "🗡️ 幫派鬥爭",
+        desc: "敵對幫派找上門來尋仇",
+        choices: [
+          {
+            txt: "正面對決",
+            effect: (g) => {
+              if (Math.random() > 0.5) {
+                g.money += 1000000;
+                g.health -= 20;
+                g.skills.charm += 10;
+                return "打贏了！搶到100萬，威名遠播";
+              } else {
+                g.health -= 40;
+                g.money -= 500000;
+                return "重傷住院，損失慘重";
+              }
+            },
+          },
+          {
+            txt: "談判和解",
+            effect: (g) => {
+              g.money -= 300000;
+              g.skills.communication += 10;
+              return "花30萬擺平，學會談判技巧";
+            },
+          },
+        ],
+      },
+      {
+        title: "💰 地盤擴張",
+        desc: "有機會擴張家族勢力範圍",
+        effect: (g) => {
+          if (g.money >= 500000) {
+            g.money -= 500000;
+            g.yearlyMoney += 10000;
+            return "投資50萬擴張地盤，年收入+1萬";
+          }
+          return "資金不足";
+        },
+      },
+    ],
+    hacker: [
+      {
+        title: "💻 暗網委託",
+        desc: "收到高額駭客任務委託，但可能違法",
+        choices: [
+          {
+            txt: "接受任務",
+            effect: (g) => {
+              if (g.skills.programming > 80) {
+                g.money += 2000000;
+                g.skills.programming += 10;
+                return "任務成功！賺200萬，技術大增";
+              } else {
+                g.happy -= 15;
+                g.money -= 100000;
+                return "技術不足導致失敗，損失10萬";
+              }
+            },
+          },
+          {
+            txt: "拒絕任務",
+            effect: (g) => {
+              g.happy += 5;
+              g.intel += 3;
+              return "保持道德底線，心安理得";
+            },
+          },
+        ],
+      },
+      {
+        title: "🛡️ 資安漏洞發現",
+        desc: "發現重大資安漏洞",
+        effect: (g) => {
+          g.skills.programming += 15;
+          g.money += 500000;
+          return "獲得漏洞獎金50萬";
+        },
+      },
+    ],
+    royal: [
+      {
+        title: "👑 皇室召見",
+        desc: "遠房皇室親戚邀請參加貴族宴會",
+        effect: (g) => {
+          g.skills.charm += 15;
+          g.skills.communication += 10;
+          g.money += 500000;
+          return "社交圈大幅提升，魅力+15";
+        },
+      },
+      {
+        title: "💍 聯姻提議",
+        desc: "其他貴族家族提出聯姻",
+        choices: [
+          {
+            txt: "接受聯姻",
+            effect: (g) => {
+              g.money += 5000000;
+              g.happy -= 20;
+              return "獲得500萬嫁妝但失去自由";
+            },
+          },
+          {
+            txt: "拒絕聯姻",
+            effect: (g) => {
+              g.happy += 15;
+              return "追求真愛，心靈自由";
+            },
+          },
+        ],
+      },
+    ],
+    monk: [
+      {
+        title: "🙏 頓悟時刻",
+        desc: "修行時突然開悟，身心靈得到昇華",
+        effect: (g) => {
+          g.happy += 30;
+          g.intel += 10;
+          g.health += 15;
+          return "身心靈全面提升";
+        },
+      },
+      {
+        title: "📿 雲遊四方",
+        desc: "師父建議你雲遊參學",
+        effect: (g) => {
+          g.intel += 15;
+          g.skills.communication += 10;
+          g.happy += 20;
+          return "見識大增，心胸開闊";
+        },
+      },
+    ],
+    esports: [
+      {
+        title: "🎮 戰隊邀請",
+        desc: "頂級職業戰隊想高薪簽約你",
+        choices: [
+          {
+            txt: "簽約當選手",
+            effect: (g) => {
+              g.jobId = "esports_player";
+              g.money += 800000;
+              g.happy += 20;
+              return "成為職業選手，簽約金80萬";
+            },
+          },
+          {
+            txt: "拒絕簽約",
+            effect: (g) => {
+              g.intel += 5;
+              return "專注本業發展";
+            },
+          },
+        ],
+      },
+      {
+        title: "🏆 比賽邀請",
+        desc: "受邀參加電競比賽",
+        effect: (g) => {
+          if (Math.random() > 0.6) {
+            g.money += 500000;
+            g.happy += 20;
+            return "奪冠！獲得獎金50萬";
+          } else {
+            g.happy += 5;
+            return "雖敗猶榮，獲得經驗";
+          }
+        },
+      },
+    ],
+    spy: [
+      {
+        title: "🕵️ 機密任務",
+        desc: "父親希望你協助執行情報工作",
+        choices: [
+          {
+            txt: "接受任務",
+            effect: (g) => {
+              if (g.intel > 90) {
+                g.money += 1500000;
+                g.health -= 10;
+                g.intel += 10;
+                return "任務成功！賺150萬但有一定風險";
+              } else {
+                g.happy -= 10;
+                g.health -= 15;
+                return "能力不足，任務失敗";
+              }
+            },
+          },
+          {
+            txt: "拒絕任務",
+            effect: (g) => {
+              g.happy += 5;
+              return "選擇平凡生活";
+            },
+          },
+        ],
+      },
+      {
+        title: "🔐 破譯密碼",
+        desc: "發現神秘加密訊息",
+        effect: (g) => {
+          if (g.intel > 100) {
+            g.money += 800000;
+            g.intel += 15;
+            return "成功破譯，獲得80萬獎勵";
+          }
+          return "難度太高，無法破譯";
+        },
+      },
+    ],
+    chef_family: [
+      {
+        title: "🍳 美食大賽",
+        desc: "受邀參加國際烹飪大賽",
+        effect: (g) => {
+          if (g.skills.cooking > 80) {
+            g.money += 1000000;
+            g.skills.cooking += 20;
+            g.happy += 25;
+            return "奪冠！獲得100萬獎金";
+          } else {
+            g.skills.cooking += 10;
+            g.happy += 10;
+            return "雖未得獎但技術精進";
+          }
+        },
+      },
+      {
+        title: "⭐ 米其林評鑑",
+        desc: "米其林評審來訪餐廳",
+        effect: (g) => {
+          g.skills.cooking += 15;
+          g.money += 500000;
+          g.happy += 20;
+          return "獲得星級認證，名聲大噪";
+        },
+      },
+    ],
+    fashion: [
+      {
+        title: "👗 時裝週邀請",
+        desc: "巴黎時裝週邀請你走秀",
+        effect: (g) => {
+          g.skills.charm += 20;
+          g.money += 800000;
+          g.happy += 15;
+          return "大放異彩，魅力+20";
+        },
+      },
+      {
+        title: "📸 時尚雜誌封面",
+        desc: "國際時尚雜誌想邀你當封面",
+        effect: (g) => {
+          g.skills.charm += 15;
+          g.money += 500000;
+          return "登上封面，知名度大增";
+        },
+      },
+    ],
+    scientist_family: [
+      {
+        title: "🔬 論文發表",
+        desc: "你的研究論文受到學界關注",
+        effect: (g) => {
+          g.intel += 20;
+          g.money += 1000000;
+          g.happy += 15;
+          return "學術地位提升，獲得研究經費";
+        },
+      },
+      {
+        title: "🏅 科學獎項",
+        desc: "獲得重要科學獎項提名",
+        effect: (g) => {
+          if (g.intel > 120) {
+            g.money += 5000000;
+            g.intel += 25;
+            g.happy += 30;
+            return "獲獎！得到500萬獎金";
+          } else {
+            g.intel += 10;
+            return "雖未獲獎但備受肯定";
+          }
+        },
+      },
+    ],
   };
 
   // 預設事件 (避免該出身沒有事件時報錯)
@@ -1992,10 +2301,9 @@ function triggerOriginEvent() {
   const originId = Game.originId;
   const events = originEvents[originId] || defaultEvents;
 
-  // 20% 機率觸發出身事件
-  if (Math.random() < 0.2) {
+  // ✅ 降低觸發機率到 5%
+  if (Math.random() < 0.05) {
     const event = events[Math.floor(Math.random() * events.length)];
-
     if (event.choices) {
       showOriginEventModal(event);
     } else if (event.effect) {
@@ -2560,7 +2868,7 @@ function nextYear() {
 
     // ===== 4. 過年：增加年齡、重置體力、增加工齡 =====
     Game.age++;
-    Game.stamina = 100;
+    Game.stamina = Game.maxStamina;
     Game.currentLocation = "home";
     generateTurnActions();
     Game.workYears++;
@@ -4586,7 +4894,7 @@ function renderStats() {
   );
 
   // ✅ 新增翻譯
-  const highestSkillName = getStatName(highestSkill); 
+  const highestSkillName = getStatName(highestSkill);
 
   const totalWealth =
     Game.money +
@@ -4713,376 +5021,6 @@ function restartGame() {
     confirm("確定要重新開始嗎？\n\n⚠️ 當前進度將會清除\n✅ 已解鎖的成就會保留")
   ) {
     location.reload();
-  }
-}
-// 🔴 出身專屬事件系統
-function triggerOriginEvent() {
-  const originEvents = {
-    rich: [
-      {
-        title: "🏢 家族企業危機",
-        desc: "父親公司遭惡意收購，需要緊急資金援助",
-        choices: [
-          {
-            txt: "投資500萬救公司",
-            effect: (g) => {
-              if (g.money >= 5000000) {
-                g.money -= 5000000;
-                g.money += 10000000;
-                return "成功拯救企業，公司價值翻倍！賺回1000萬";
-              }
-              return "資金不足，無法投資";
-            },
-          },
-          {
-            txt: "袖手旁觀",
-            effect: (g) => {
-              g.yearlyMoney = 0;
-              g.happy -= 20;
-              return "家族企業倒閉，失去零用錢來源";
-            },
-          },
-        ],
-      },
-      {
-        title: "💎 繼承遺產",
-        desc: "遠房親戚突然過世，留下一筆遺產給你",
-        effect: (g) => {
-          g.money += 3000000;
-          g.happy += 10;
-          return "獲得300萬遺產";
-        },
-      },
-    ],
-    genius: [
-      {
-        title: "🎓 獎學金機會",
-        desc: "頂尖大學因你優異成績提供全額獎學金",
-        effect: (g) => {
-          g.intel += 20;
-          g.money += 500000;
-          return "智力+20，獲得50萬獎學金";
-        },
-      },
-      {
-        title: "🔬 研究突破",
-        desc: "你的研究獲得重大突破",
-        effect: (g) => {
-          g.intel += 15;
-          g.money += 200000;
-          g.happy += 15;
-          return "學術聲譽大增";
-        },
-      },
-    ],
-    mafia: [
-      {
-        title: "🗡️ 幫派鬥爭",
-        desc: "敵對幫派找上門來尋仇",
-        choices: [
-          {
-            txt: "正面對決",
-            effect: (g) => {
-              if (Math.random() > 0.5) {
-                g.money += 1000000;
-                g.health -= 20;
-                g.skills.charm += 10;
-                return "打贏了！搶到100萬，威名遠播";
-              } else {
-                g.health -= 40;
-                g.money -= 500000;
-                return "重傷住院，損失慘重";
-              }
-            },
-          },
-          {
-            txt: "談判和解",
-            effect: (g) => {
-              g.money -= 300000;
-              g.skills.communication += 10;
-              return "花30萬擺平，學會談判技巧";
-            },
-          },
-        ],
-      },
-      {
-        title: "💰 地盤擴張",
-        desc: "有機會擴張家族勢力範圍",
-        effect: (g) => {
-          if (g.money >= 500000) {
-            g.money -= 500000;
-            g.yearlyMoney += 10000;
-            return "投資50萬擴張地盤，年收入+1萬";
-          }
-          return "資金不足";
-        },
-      },
-    ],
-    hacker: [
-      {
-        title: "💻 暗網委託",
-        desc: "收到高額駭客任務委託，但可能違法",
-        choices: [
-          {
-            txt: "接受任務",
-            effect: (g) => {
-              if (g.skills.programming > 80) {
-                g.money += 2000000;
-                g.skills.programming += 10;
-                return "任務成功！賺200萬，技術大增";
-              } else {
-                g.happy -= 15;
-                g.money -= 100000;
-                return "技術不足導致失敗，損失10萬";
-              }
-            },
-          },
-          {
-            txt: "拒絕任務",
-            effect: (g) => {
-              g.happy += 5;
-              g.intel += 3;
-              return "保持道德底線，心安理得";
-            },
-          },
-        ],
-      },
-      {
-        title: "🛡️ 資安漏洞發現",
-        desc: "發現重大資安漏洞",
-        effect: (g) => {
-          g.skills.programming += 15;
-          g.money += 500000;
-          return "獲得漏洞獎金50萬";
-        },
-      },
-    ],
-    royal: [
-      {
-        title: "👑 皇室召見",
-        desc: "遠房皇室親戚邀請參加貴族宴會",
-        effect: (g) => {
-          g.skills.charm += 15;
-          g.skills.communication += 10;
-          g.money += 500000;
-          return "社交圈大幅提升，魅力+15";
-        },
-      },
-      {
-        title: "💍 聯姻提議",
-        desc: "其他貴族家族提出聯姻",
-        choices: [
-          {
-            txt: "接受聯姻",
-            effect: (g) => {
-              g.money += 5000000;
-              g.happy -= 20;
-              return "獲得500萬嫁妝但失去自由";
-            },
-          },
-          {
-            txt: "拒絕聯姻",
-            effect: (g) => {
-              g.happy += 15;
-              return "追求真愛，心靈自由";
-            },
-          },
-        ],
-      },
-    ],
-    monk: [
-      {
-        title: "🙏 頓悟時刻",
-        desc: "修行時突然開悟，身心靈得到昇華",
-        effect: (g) => {
-          g.happy += 30;
-          g.intel += 10;
-          g.health += 15;
-          return "身心靈全面提升";
-        },
-      },
-      {
-        title: "📿 雲遊四方",
-        desc: "師父建議你雲遊參學",
-        effect: (g) => {
-          g.intel += 15;
-          g.skills.communication += 10;
-          g.happy += 20;
-          return "見識大增，心胸開闊";
-        },
-      },
-    ],
-    esports: [
-      {
-        title: "🎮 戰隊邀請",
-        desc: "頂級職業戰隊想高薪簽約你",
-        choices: [
-          {
-            txt: "簽約當選手",
-            effect: (g) => {
-              g.jobId = "esports_player";
-              g.money += 800000;
-              g.happy += 20;
-              return "成為職業選手，簽約金80萬";
-            },
-          },
-          {
-            txt: "拒絕簽約",
-            effect: (g) => {
-              g.intel += 5;
-              return "專注本業發展";
-            },
-          },
-        ],
-      },
-      {
-        title: "🏆 比賽邀請",
-        desc: "受邀參加電競比賽",
-        effect: (g) => {
-          if (Math.random() > 0.6) {
-            g.money += 500000;
-            g.happy += 20;
-            return "奪冠！獲得獎金50萬";
-          } else {
-            g.happy += 5;
-            return "雖敗猶榮，獲得經驗";
-          }
-        },
-      },
-    ],
-    spy: [
-      {
-        title: "🕵️ 機密任務",
-        desc: "父親希望你協助執行情報工作",
-        choices: [
-          {
-            txt: "接受任務",
-            effect: (g) => {
-              if (g.intel > 90) {
-                g.money += 1500000;
-                g.health -= 10;
-                g.intel += 10;
-                return "任務成功！賺150萬但有一定風險";
-              } else {
-                g.happy -= 10;
-                g.health -= 15;
-                return "能力不足，任務失敗";
-              }
-            },
-          },
-          {
-            txt: "拒絕任務",
-            effect: (g) => {
-              g.happy += 5;
-              return "選擇平凡生活";
-            },
-          },
-        ],
-      },
-      {
-        title: "🔐 破譯密碼",
-        desc: "發現神秘加密訊息",
-        effect: (g) => {
-          if (g.intel > 100) {
-            g.money += 800000;
-            g.intel += 15;
-            return "成功破譯，獲得80萬獎勵";
-          }
-          return "難度太高，無法破譯";
-        },
-      },
-    ],
-    chef_family: [
-      {
-        title: "🍳 美食大賽",
-        desc: "受邀參加國際烹飪大賽",
-        effect: (g) => {
-          if (g.skills.cooking > 80) {
-            g.money += 1000000;
-            g.skills.cooking += 20;
-            g.happy += 25;
-            return "奪冠！獲得100萬獎金";
-          } else {
-            g.skills.cooking += 10;
-            g.happy += 10;
-            return "雖未得獎但技術精進";
-          }
-        },
-      },
-      {
-        title: "⭐ 米其林評鑑",
-        desc: "米其林評審來訪餐廳",
-        effect: (g) => {
-          g.skills.cooking += 15;
-          g.money += 500000;
-          g.happy += 20;
-          return "獲得星級認證，名聲大噪";
-        },
-      },
-    ],
-    fashion: [
-      {
-        title: "👗 時裝週邀請",
-        desc: "巴黎時裝週邀請你走秀",
-        effect: (g) => {
-          g.skills.charm += 20;
-          g.money += 800000;
-          g.happy += 15;
-          return "大放異彩，魅力+20";
-        },
-      },
-      {
-        title: "📸 時尚雜誌封面",
-        desc: "國際時尚雜誌想邀你當封面",
-        effect: (g) => {
-          g.skills.charm += 15;
-          g.money += 500000;
-          return "登上封面，知名度大增";
-        },
-      },
-    ],
-    scientist_family: [
-      {
-        title: "🔬 論文發表",
-        desc: "你的研究論文受到學界關注",
-        effect: (g) => {
-          g.intel += 20;
-          g.money += 1000000;
-          g.happy += 15;
-          return "學術地位提升，獲得研究經費";
-        },
-      },
-      {
-        title: "🏅 科學獎項",
-        desc: "獲得重要科學獎項提名",
-        effect: (g) => {
-          if (g.intel > 120) {
-            g.money += 5000000;
-            g.intel += 25;
-            g.happy += 30;
-            return "獲獎！得到500萬獎金";
-          } else {
-            g.intel += 10;
-            return "雖未獲獎但備受肯定";
-          }
-        },
-      },
-    ],
-  };
-
-  const originId = Game.originId;
-  const events = originEvents[originId];
-
-  if (events && events.length > 0) {
-    const event = events[Math.floor(Math.random() * events.length)];
-
-    if (event.choices) {
-      showOriginEventModal(event);
-    } else if (event.effect) {
-      const result = event.effect(Game);
-      log(`🎭 【${Game.origin}專屬】${event.title}：${result}`);
-      Game.totalEvents++;
-    }
   }
 }
 

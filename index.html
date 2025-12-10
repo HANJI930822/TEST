@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>時事人生終極版</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="scene-creation">
@@ -14,7 +14,13 @@
         <div class="card-body">
           <div class="input-group">
             <label>✏️ 姓名</label>
-            <input type="text" id="inp-name" placeholder="輸入姓名" maxlength="8" value="測試玩家" />
+            <input
+              type="text"
+              id="inp-name"
+              placeholder="輸入姓名"
+              maxlength="8"
+              value="測試玩家"
+            />
           </div>
           <div class="input-group">
             <label>🚻 性別</label>
@@ -32,45 +38,98 @@
 
       <button class="btn-main" onclick="startGame()">🚀 開始人生冒險</button>
     </div>
-    <div id="stats-allocation-screen" class="screen" style="display: none;">
-    <div class="allocation-container">
+    <div id="stats-allocation-screen" class="screen" style="display: none">
+      <div class="allocation-container">
         <h2>✨ 塑造你的角色</h2>
-        <p class="desc-text">你有 <span id="free-points" class="highlight-point">50</span> 點天賦點數可自由分配</p>
-        
-        <div class="stats-group">
-            <div class="stat-row" data-stat="intel">
-                <span class="stat-label">🧠 智力</span>
-                <button class="btn-stat btn-minus" onclick="adjustStat('intel', -1)">-</button>
-                <span class="stat-value" id="alloc-intel">0</span>
-                <button class="btn-stat btn-plus" onclick="adjustStat('intel', 1)">+</button>
-            </div>
-            
-            <div class="stat-row" data-stat="charm">
-                <span class="stat-label">✨ 魅力</span>
-                <button class="btn-stat btn-minus" onclick="adjustStat('charm', -1)">-</button>
-                <span class="stat-value" id="alloc-charm">0</span>
-                <button class="btn-stat btn-plus" onclick="adjustStat('charm', 1)">+</button>
-            </div>
-            
-            <div class="stat-row" data-stat="health">
-                <span class="stat-label">💪 健康</span>
-                <button class="btn-stat btn-minus" onclick="adjustStat('health', -1)">-</button>
-                <span class="stat-value" id="alloc-health">0</span>
-                <button class="btn-stat btn-plus" onclick="adjustStat('health', 1)">+</button>
-            </div>
+        <p class="desc-text">
+          你有
+          <span id="free-points" class="highlight-point">50</span>
+          點天賦點數可自由分配
+        </p>
 
-            <div class="stat-row" data-stat="money">
-                <span class="stat-label">💰 財富</span>
-                <button class="btn-stat btn-minus" onclick="adjustStat('money', -1)">-</button>
-                <span class="stat-value" id="alloc-money">0</span>
-                <button class="btn-stat btn-plus" onclick="adjustStat('money', 1)">+</button>
-                <span class="stat-hint">(1點 = $2,000)</span>
-            </div>
+        <div class="stats-group">
+          <div class="stat-row" data-stat="intel">
+            <span class="stat-label">🧠 智力</span>
+            <button
+              class="btn-stat btn-minus"
+              onclick="adjustStat('intel', -1)"
+            >
+              -
+            </button>
+            <span class="stat-value" id="alloc-intel">0</span>
+            <button class="btn-stat btn-plus" onclick="adjustStat('intel', 1)">
+              +
+            </button>
+          </div>
+
+          <div class="stat-row" data-stat="charm">
+            <span class="stat-label">✨ 魅力</span>
+            <button
+              class="btn-stat btn-minus"
+              onclick="adjustStat('charm', -1)"
+            >
+              -
+            </button>
+            <span class="stat-value" id="alloc-charm">0</span>
+            <button class="btn-stat btn-plus" onclick="adjustStat('charm', 1)">
+              +
+            </button>
+          </div>
+
+          <div class="stat-row" data-stat="health">
+            <span class="stat-label">💪 健康</span>
+            <button
+              class="btn-stat btn-minus"
+              onclick="adjustStat('health', -1)"
+            >
+              -
+            </button>
+            <span class="stat-value" id="alloc-health">0</span>
+            <button class="btn-stat btn-plus" onclick="adjustStat('health', 1)">
+              +
+            </button>
+          </div>
+
+          <div class="stat-row" data-stat="money">
+            <span class="stat-label">💰 財富</span>
+            <button
+              class="btn-stat btn-minus"
+              onclick="adjustStat('money', -1)"
+            >
+              -
+            </button>
+            <span class="stat-value" id="alloc-money">0</span>
+            <button class="btn-stat btn-plus" onclick="adjustStat('money', 1)">
+              +
+            </button>
+            <span class="stat-hint">(1點 = $2,000)</span>
+          </div>
         </div>
 
-        <button class="btn-primary start-btn" onclick="confirmAllocation()">開始人生</button>
+        <button class="btn-primary start-btn" onclick="confirmAllocation()">
+          開始人生
+        </button>
+      </div>
     </div>
-</div>
+    <div id="trait-selection-screen" class="screen" style="display: none;">
+      <div class="allocation-container" style="max-width: 600px;">
+        <h2>✨ 選擇天賦特質 (3/3)</h2>
+        <p class="desc-text" style="margin-bottom: 15px;">請選擇 3 個影響你一生的特質</p>
+        
+        <div id="trait-card-container" style="min-height: 450px;"></div>
+
+        <div style="margin-top: 20px;">
+            <div style="color: var(--text-dim); font-size: 0.9em; margin-bottom: 5px;">
+                已選擇 (<span id="selected-count">0</span>/3)
+            </div>
+            <div id="selected-traits-list" style="min-height: 40px;"></div>
+        </div>
+
+        <button id="finish-trait-btn" class="btn-primary start-btn" onclick="finishTraitSelection()" disabled style="opacity: 0.5;">
+            開始冒險
+        </button>
+      </div>
+    </div>
     <div id="scene-game">
       <div class="header">
         <div class="dashboard-wrapper">
@@ -96,7 +155,15 @@
           </div>
 
           <div class="skills-section">
-            <div class="section-label" style="font-size: 0.8em; color: var(--accent); margin-bottom: 5px; text-align: right;">
+            <div
+              class="section-label"
+              style="
+                font-size: 0.8em;
+                color: var(--accent);
+                margin-bottom: 5px;
+                text-align: right;
+              "
+            >
               📊 技能狀態
             </div>
             <div id="skills-container" class="skills-grid-layout"></div>
@@ -132,11 +199,12 @@
       <div id="page-home" class="page active">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">📅 人生階段：<span id="life-stage">嬰兒期</span></span>
+            <span class="card-title"
+              >📅 人生階段：<span id="life-stage">嬰兒期</span></span
+            >
           </div>
           <div class="card-body">
-            <div class="btn-grid" id="action-buttons">
-              </div>
+            <div class="btn-grid" id="action-buttons"></div>
           </div>
         </div>
 
@@ -159,7 +227,13 @@
             <span class="card-title">💼 職業選擇</span>
           </div>
           <div class="card-body">
-            <div style="color: var(--text-dim); margin-bottom: 15px; font-size: 0.9em;">
+            <div
+              style="
+                color: var(--text-dim);
+                margin-bottom: 15px;
+                font-size: 0.9em;
+              "
+            >
               💡 選擇職業後每年自動獲得薪水，不同職業有不同特殊效果
             </div>
             <div id="job-list"></div>
@@ -191,20 +265,41 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">🗺️ 城市地圖</span>
-            <span style="font-size:0.8em; float:right; color:var(--text-dim)">位置：<span id="current-location" style="color:var(--gold)">🏠 家</span></span>
+            <span style="font-size: 0.8em; float: right; color: var(--text-dim)"
+              >位置：<span id="current-location" style="color: var(--gold)"
+                >🏠 家</span
+              ></span
+            >
           </div>
           <div class="card-body">
             <div id="map-grid" class="map-grid"></div>
-            
-            <div id="location-actions" style="margin-top: 20px; border-top: 1px solid #444; padding-top: 15px; display:none;">
-                <div style="display:flex; align-items:center; margin-bottom:10px;">
-                    <div id="loc-icon" style="font-size:2em; margin-right:10px;"></div>
-                    <div>
-                        <h3 id="loc-name" style="color:var(--gold); margin:0;">地點</h3>
-                        <div id="loc-desc" style="color:#aaa; font-size:0.85em;">描述</div>
-                    </div>
+
+            <div
+              id="location-actions"
+              style="
+                margin-top: 20px;
+                border-top: 1px solid #444;
+                padding-top: 15px;
+                display: none;
+              "
+            >
+              <div
+                style="display: flex; align-items: center; margin-bottom: 10px"
+              >
+                <div
+                  id="loc-icon"
+                  style="font-size: 2em; margin-right: 10px"
+                ></div>
+                <div>
+                  <h3 id="loc-name" style="color: var(--gold); margin: 0">
+                    地點
+                  </h3>
+                  <div id="loc-desc" style="color: #aaa; font-size: 0.85em">
+                    描述
+                  </div>
                 </div>
-                <div id="loc-btn-container" class="btn-grid"></div>
+              </div>
+              <div id="loc-btn-container" class="btn-grid"></div>
             </div>
           </div>
         </div>
@@ -273,7 +368,11 @@
       </div>
     </div>
 
-    <div id="event-modal" class="modal-overlay" onclick="if (event.target === this) closeModal();">
+    <div
+      id="event-modal"
+      class="modal-overlay"
+      onclick="if (event.target === this) closeModal();"
+    >
       <div class="modal-box">
         <div class="modal-title" id="ev-title"></div>
         <div class="modal-desc" id="ev-desc"></div>
@@ -281,15 +380,51 @@
         <button class="modal-btn" id="btn-choice-b">B</button>
       </div>
     </div>
-    
-    <div id="ending-overlay" class="modal-overlay" style="z-index: 400; display: none; align-items: center; justify-content: center;">
-        <div class="modal-box" style="text-align: center; background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid var(--gold);">
-          <div style="font-size: 3em; margin-bottom: 10px" id="ending-icon">💀</div>
-          <h2 style="color: var(--gold); margin-bottom: 10px" id="ending-title">結局標題</h2>
-          <p style="color: #ddd; line-height: 1.6; margin-bottom: 20px" id="ending-desc">結局描述...</p>
-          <div id="ending-stats" style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9em;"></div>
-          <button class="btn-main" onclick="location.reload()">🔄 重新開始人生</button>
+
+    <div
+      id="ending-overlay"
+      class="modal-overlay"
+      style="
+        z-index: 400;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        class="modal-box"
+        style="
+          text-align: center;
+          background: linear-gradient(135deg, #1a1a2e, #16213e);
+          border: 2px solid var(--gold);
+        "
+      >
+        <div style="font-size: 3em; margin-bottom: 10px" id="ending-icon">
+          💀
         </div>
+        <h2 style="color: var(--gold); margin-bottom: 10px" id="ending-title">
+          結局標題
+        </h2>
+        <p
+          style="color: #ddd; line-height: 1.6; margin-bottom: 20px"
+          id="ending-desc"
+        >
+          結局描述...
+        </p>
+        <div
+          id="ending-stats"
+          style="
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+          "
+        ></div>
+        <button class="btn-main" onclick="location.reload()">
+          🔄 重新開始人生
+        </button>
+      </div>
     </div>
 
     <script src="data.js"></script>
