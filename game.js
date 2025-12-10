@@ -3,6 +3,13 @@ let skillsCollapsed = false;
 let currentJobIndex = 0; // 當前顯示的職業索引
 let isProcessing = false; // 防止重复点击
 let lastUpdateTime = 0;
+let allocationState = {
+    points: 50,
+    intel: 0,
+    charm: 0,
+    health: 0,
+    money: 0
+};
 const UPDATE_THROTTLE = 50; // UI更新节流
 
 let Game = {
@@ -75,6 +82,23 @@ let Game = {
   skillBonus: 1,
   luckBonus: 0,
 };
+// 計算已解鎖成就數量
+function getUnlockedAchievementCount() {
+  const saved = loadAchievements(); // 你原本的載入函式
+  return Array.isArray(saved) ? saved.length : 0;
+}
+
+// 判斷頂級出身是否解鎖：完成一半成就才解鎖
+function isTopOriginUnlocked() {
+  const unlocked = getUnlockedAchievementCount();
+  const total = ACHIEVEMENTS.length;
+  return unlocked >= Math.ceil(total / 2);
+}
+function isTopOriginUnlocked() {
+  const unlocked = getUnlockedAchievementCount();
+  const total = ACHIEVEMENTS.length;
+  return unlocked >= Math.ceil(total / 2);
+}
 function getStatName(key) {
   const map = {
     money: "💰 金錢",
@@ -116,79 +140,161 @@ function renderOriginCard() {
   if (currentOriginIndex < 0) currentOriginIndex = ORIGINS.length - 1;
 
   const o = ORIGINS[currentOriginIndex];
+  const topUnlocked = isTopOriginUnlocked();
+  const isTopOrigin = !!o.special;        // 有 special 的都視為頂級出身
+  const locked = isTopOrigin && !topUnlocked;
+
+  // 如果是鎖住的頂級出身，加一段提示文字
+  const lockHint = locked
+    ? `<div style="margin-top: 12px; padding: 10px; border-radius: 8px;
+                   background: rgba(255,255,255,0.05); color: var(--text-dim); text-align: center;">
+         🔒 頂級出身已鎖定<br>
+         完成至少一半的成就後解鎖
+       </div>`
+    : "";
 
   let html = `
-              <div style="position: relative; min-height: 450px;">
-                  <!-- 左箭頭 -->
-                  <button onclick="prevOrigin()"
-                          style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-                                 width: 60px; height: 60px; border-radius: 50%; font-size: 2em;
-                                 background: linear-gradient(135deg, #444, #555); z-index: 100;
-                                 border: 3px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                      ◀
-                  </button>
+      <div style="position: relative; min-height: 450px;">
+        <!-- 左箭頭 -->
+        <button onclick="prevOrigin()"
+                style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+                       width: 60px; height: 60px; border-radius: 50%; font-size: 2em;
+                       background: linear-gradient(135deg, #444, #555); z-index: 100;
+                       border: 3px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+          ◀
+        </button>
 
-                  <!-- 右箭頭 -->
-                  <button onclick="nextOrigin()"
-                          style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-                                 width: 60px; height: 60px; border-radius: 50%; font-size: 2em;
-                                 background: linear-gradient(135deg, #444, #555); z-index: 100;
-                                 border: 3px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                      ▶
-                  </button>
+        <!-- 右箭頭 -->
+        <button onclick="nextOrigin()"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                       width: 60px; height: 60px; border-radius: 50%; font-size: 2em;
+                       background: linear-gradient(135deg, #444, #555); z-index: 100;
+                       border: 3px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+          ▶
+        </button>
 
-                  <!-- 出身卡片 -->
-                  <div style="padding: 0 80px;">
-                      <div class="origin-card selected"
-                           style="transform: scale(1.05); box-shadow: 0 10px 30px rgba(187, 134, 252, 0.4);
-                                  border-color: var(--accent); cursor: default;">
-                          <div class="origin-name" style="font-size: 1.8em; text-align: center; margin-bottom: 10px; color: var(--gold);">
-                              ${o.name}
-                          </div>
-                          <div class="origin-parents" style="text-align: center; font-size: 1em; margin-bottom: 15px; color: #888;">
-                              👨‍👩‍👦 ${o.parents}
-                          </div>
-                          <div class="origin-desc" style="line-height: 1.6; margin: 15px 0; font-size: 0.95em; color: var(--text-dim);">
-                              ${o.desc}
-                          </div>
-                          <div class="origin-stats" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
-                              <div style="margin-bottom: 8px;">
-                                  💰 初始資金: <span style="color: var(--gold); font-weight: bold;">$${o.money.toLocaleString()}</span>
-                              </div>
-                              <div style="margin-bottom: 8px;">
-                                  🧠 智力: ${o.intel} | 😊 快樂: ${o.happy}
-                              </div>
-                              <div style="margin-bottom: 8px;">
-                                  📅 年收入: $${o.yearlyMoney.toLocaleString()}
-                              </div>
-                              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); color: var(--green);">
-                                  ✨ ${o.buff}
-                              </div>
-                          </div>
-                      </div>
-
-                      <!-- 指示器 -->
-                      <div style="text-align: center; margin-top: 20px; color: var(--text-dim);">
-                          <div style="font-size: 1.1em; margin-bottom: 5px;">
-                              出身 ${currentOriginIndex + 1} / ${ORIGINS.length}
-                          </div>
-                          <div style="font-size: 0.9em;">
-                              💡 左右切換查看更多出身背景
-                          </div>
-                      </div>
-                  </div>
+        <!-- 出身卡片 -->
+        <div style="padding: 0 80px;">
+          <div class="origin-card selected"
+               style="transform: scale(1.05);
+                      box-shadow: 0 10px 30px rgba(187, 134, 252, 0.4);
+                      border-color: var(--accent);
+                      cursor: ${locked ? "not-allowed" : "default"};
+                      opacity: ${locked ? 0.5 : 1};">
+            <div class="origin-name" style="font-size: 1.8em; text-align: center; margin-bottom: 10px; color: var(--gold);">
+              ${locked ? "🔒 " : ""}${o.name}
+            </div>
+            <div class="origin-parents" style="text-align: center; font-size: 1em; margin-bottom: 15px; color: #888;">
+              👨‍👩‍👦 ${o.parents}
+            </div>
+            <div class="origin-desc" style="line-height: 1.6; margin: 15px 0; font-size: 0.95em; color: var(--text-dim);">
+              ${o.desc}
+            </div>
+            <div class="origin-stats" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
+              <div style="margin-bottom: 8px;">
+                💰 初始資金: <span style="color: var(--gold); font-weight: bold;">$${o.money.toLocaleString()}</span>
               </div>
-          `;
+              <div style="margin-bottom: 8px;">
+                🧠 智力: ${o.intel} | 😊 快樂: ${o.happy}
+              </div>
+              <div style="margin-bottom: 8px;">
+                📅 年收入: $${o.yearlyMoney.toLocaleString()}
+              </div>
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); color: var(--green);">
+                ✨ ${o.buff}
+              </div>
+              ${lockHint}
+            </div>
+          </div>
+
+          <!-- 指示器 -->
+          <div style="text-align: center; margin-top: 20px; color: var(--text-dim);">
+            <div style="font-size: 1.1em; margin-bottom: 5px;">
+              出身 ${currentOriginIndex + 1} / ${ORIGINS.length}
+            </div>
+            <div style="font-size: 0.9em;">
+              💡 左右切換查看更多出身背景
+            </div>
+          </div>
+        </div>
+      </div>
+  `;
 
   document.getElementById("origin-list").innerHTML = html;
 
-  // 自動選中當前出身
-  selectOrigin(o.id);
+  // 如果是鎖住的頂級出身，就不要 selectOrigin，避免被當成可選
+  if (!locked) {
+    selectOrigin(o.id);
+  } else {
+    // 鎖住時，強迫 selectedOriginId 指向一個安全值（例如 common）
+    selectedOriginId = "common";
+  }
 }
 
-function selectOrigin(id) {
-  selectedOriginId = id;
+
+function selectOrigin(originId) {
+    selectedOrigin = ORIGINS.find(o => o.id === originId);
+    
+    // 隱藏出身選擇畫面
+    document.getElementById("origin-selection").style.display = "none";
+    
+    // 初始化分配狀態 (重置)
+    allocationState = {
+        points: 50,
+        intel: 0,
+        charm: 0,
+        health: 0,
+        money: 0
+    };
+    updateAllocationUI();
+    
+    // 顯示屬性分配畫面
+    document.getElementById("stats-allocation-screen").style.display = "flex"; // 或 block
 }
+// 更新分配介面 UI
+function updateAllocationUI() {
+    document.getElementById("free-points").textContent = allocationState.points;
+    document.getElementById("alloc-intel").textContent = allocationState.intel;
+    document.getElementById("alloc-charm").textContent = allocationState.charm;
+    document.getElementById("alloc-health").textContent = allocationState.health;
+    document.getElementById("alloc-money").textContent = allocationState.money;
+
+    // 禁用/啟用按鈕
+    document.querySelectorAll(".btn-plus").forEach(btn => {
+        btn.disabled = allocationState.points <= 0;
+    });
+    
+    // 負值檢查 (雖然設計上不會有負值，但可防呆)
+    document.querySelectorAll(".btn-minus").forEach(btn => {
+        const type = btn.parentElement.dataset.stat;
+        btn.disabled = allocationState[type] <= 0;
+    });
+}
+
+// 調整點數
+function adjustStat(type, change) {
+    if (change > 0 && allocationState.points > 0) {
+        allocationState[type]++;
+        allocationState.points--;
+    } else if (change < 0 && allocationState[type] > 0) {
+        allocationState[type]--;
+        allocationState.points++;
+    }
+    updateAllocationUI();
+}
+
+// 確認分配並開始遊戲 (這是新的進入點)
+function confirmAllocation() {
+    if (allocationState.points > 0) {
+        if (!confirm(`你還有 ${allocationState.points} 點未分配，確定要開始嗎？`)) {
+            return;
+        }
+    }
+    
+    document.getElementById("stats-allocation-screen").style.display = "none";
+    startGame();
+}
+
 function prevOrigin() {
   currentOriginIndex--;
   if (currentOriginIndex < 0) {
@@ -333,10 +439,18 @@ function startGame() {
     yearlyMoney: origin.yearlyMoney,
     talents: selectedTalents,
     age: 0,
+     money: origin.money + (allocationState.money * 2000), 
+      intel: origin.intel + allocationState.intel,
+      happy: origin.happy, 
+       health: 50 + allocationState.health, 
     // ✅ 這裡統一清空，資料將由下方的 initNPCs 載入
     npcs: [], 
     relationships: [], 
     unlockedAchievements: savedAchievements,
+    skills: {
+        ...Game.skills, // 保持預設歸零
+        charm: allocationState.charm // 載入分配的魅力
+    }
   };
 
   // 3. 記錄是否負債過

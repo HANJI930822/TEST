@@ -32,7 +32,45 @@
 
       <button class="btn-main" onclick="startGame()">🚀 開始人生冒險</button>
     </div>
+    <div id="stats-allocation-screen" class="screen" style="display: none;">
+    <div class="allocation-container">
+        <h2>✨ 塑造你的角色</h2>
+        <p class="desc-text">你有 <span id="free-points" class="highlight-point">50</span> 點天賦點數可自由分配</p>
+        
+        <div class="stats-group">
+            <div class="stat-row" data-stat="intel">
+                <span class="stat-label">🧠 智力</span>
+                <button class="btn-stat btn-minus" onclick="adjustStat('intel', -1)">-</button>
+                <span class="stat-value" id="alloc-intel">0</span>
+                <button class="btn-stat btn-plus" onclick="adjustStat('intel', 1)">+</button>
+            </div>
+            
+            <div class="stat-row" data-stat="charm">
+                <span class="stat-label">✨ 魅力</span>
+                <button class="btn-stat btn-minus" onclick="adjustStat('charm', -1)">-</button>
+                <span class="stat-value" id="alloc-charm">0</span>
+                <button class="btn-stat btn-plus" onclick="adjustStat('charm', 1)">+</button>
+            </div>
+            
+            <div class="stat-row" data-stat="health">
+                <span class="stat-label">💪 健康</span>
+                <button class="btn-stat btn-minus" onclick="adjustStat('health', -1)">-</button>
+                <span class="stat-value" id="alloc-health">0</span>
+                <button class="btn-stat btn-plus" onclick="adjustStat('health', 1)">+</button>
+            </div>
 
+            <div class="stat-row" data-stat="money">
+                <span class="stat-label">💰 財富</span>
+                <button class="btn-stat btn-minus" onclick="adjustStat('money', -1)">-</button>
+                <span class="stat-value" id="alloc-money">0</span>
+                <button class="btn-stat btn-plus" onclick="adjustStat('money', 1)">+</button>
+                <span class="stat-hint">(1點 = $2,000)</span>
+            </div>
+        </div>
+
+        <button class="btn-primary start-btn" onclick="confirmAllocation()">開始人生</button>
+    </div>
+</div>
     <div id="scene-game">
       <div class="header">
         <div class="dashboard-wrapper">
